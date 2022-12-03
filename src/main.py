@@ -1,7 +1,7 @@
 from models import *
 from spider import Spider
 
-database.create_tables([DomainModel, CrawlQueueModel, CrawlHistoryModel, CrawlEmailModel])
+database.create_tables([UrlCodeModel, DomainModel, CrawlQueueModel, CrawlHistoryModel, CrawlEmailModel])
 
 spider = Spider(database)
 
