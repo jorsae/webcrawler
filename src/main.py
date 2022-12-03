@@ -5,5 +5,11 @@ database.create_tables([DomainModel, CrawlQueueModel, CrawlHistoryModel, CrawlEm
 
 spider = Spider(database)
 
-robotsurl = spider.get_robots_url("https://www.youtube.com/watch?v=x2P7nDtXg-A")
-print(robotsurl)
+robots_url = spider.get_robots_url("https://www.minerals.org.au/")
+robots_url = spider.get_robots_url("https://www.usa.gov/robots.txt")
+print(robots_url)
+
+print(spider.parse_robots(robots_url))
+
+
+# TODO: Find robots file with a request delay to test it
