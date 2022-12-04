@@ -36,7 +36,7 @@ class Spider:
         try:
             self.robot_parser.read()
             self.last_robots_domain = urlparse(robots_url).netloc
-        except urllib.error.URLError as e:
+        except urllib.error.URLError:
             return UrlCode.SSL_VERIFICATION_FAILED
         except:
             return UrlCode.ERROR
