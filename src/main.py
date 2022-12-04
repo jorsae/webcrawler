@@ -1,3 +1,4 @@
+import peewee as pw
 from models import *
 from spider import Worker, Overseer
 
@@ -30,7 +31,8 @@ def fill_url_status_model():
         UrlStatusModel.get_or_create(url_status=url_status.name)
 
 def create_tables():
-    database.create_tables([UrlStatusModel, RequestStatusModel, DomainModel, CrawlQueueModel, CrawlHistoryModel, CrawlEmailModel])
+    models = BaseModel.__subclasses__()
+    database.create_tables(models)
 
 if __name__ == "__main__":
     main()
