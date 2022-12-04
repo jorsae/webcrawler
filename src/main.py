@@ -1,5 +1,5 @@
 from models import *
-from spider import Worker
+from spider import Worker, Overseer
 
 import utility
 
@@ -7,9 +7,16 @@ def main():
     create_tables()
     fill_url_status_model()
     fill_request_status_model()
-    test()
+    
+    test_overseer()
+    test_worker()
 
-def test():
+def test_overseer():
+    overseer = Overseer(database)
+    print(overseer.url_status)
+    print(overseer.request_status)
+
+def test_worker():
     worker = Worker(database)
     worker.crawl('https://jorsae.github.io/CatGameCalculator/')
     worker.crawl('https://vg.no')

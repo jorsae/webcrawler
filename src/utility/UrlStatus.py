@@ -2,5 +2,5 @@ from enum import Enum
 
 class UrlStatus(Enum):
     OK = 1
-    SSL_VERIFICATION_FAILED = 3
+    SSL_VERIFICATION_FAILED = 2
     ERROR = 3

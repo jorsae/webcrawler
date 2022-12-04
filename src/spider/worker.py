@@ -44,11 +44,13 @@ class Worker:
     def ensure_parsed(self, url):
         if urlparse(url).netloc is not self.last_robots_domain:
             robots_url = self.get_robots_url(url)
-            url_code = self.parse_robots(robots_url)
-            url_code_id = (UrlStatusModel
+            url_status = self.parse_robots(robots_url)
+            url_status_id = (UrlStatusModel
                             .select(UrlStatusModel.id)
-                            .where(url_code == url_code))
-            self.domain = DomainModel.get_or_create(domain=self.last_robots_domain, url_code_id=url_code_id)
+                            .where(UrlStatusModel.url_status == url_status.name)
+                            .get())
+            self.domain = DomainModel.get_or_create(domain=self.last_robots_domain, url_status_id=url_status_id)
+            print(f'{self.domain=}')
 
     def store_urls(self, urls):
         crawl_queue = []
