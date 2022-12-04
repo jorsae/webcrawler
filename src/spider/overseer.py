@@ -2,12 +2,24 @@ import peewee as pw
 import logging
 import time
 import threading
+import copy
+from datetime import datetime
 
 import constants
 from models import *
 from spider import Spider, Worker
 
 class Overseer:
+    crawl_queue = list()
+    crawl_queue_lock = threading.Lock()
+    @staticmethod
+    def add_crawl_queue(value):
+        try:
+            with Overseer.crawl_queue_lock:
+                Overseer.crawl_queue += value
+        except Exception as e:
+            print(e)
+
     def __init__(self, database):
         self.database = database
         self.spiders = list()
@@ -21,6 +33,9 @@ class Overseer:
                 if not spider.thread.is_alive():
                     spider.thread.handled = True
                     self.restart_spider(spider)
+            
+            if len(Overseer.crawl_queue) > constants.MAX_URLS_IN_CRAWL_QUEUE:
+                self.add_crawl_queue_database()
             time.sleep(1)
     
     def restart_spider(self, spider):
@@ -44,6 +59,40 @@ class Overseer:
         spider.thread.start()
         logging.info(f'Starting spider with: {url}')
     
+    def add_crawl_queue_database(self):
+        logging.info(f'Adding items to crawl_queue: {len(Overseer.crawl_queue)}')
+        with Overseer.crawl_queue_lock:
+            logging.debug(f'add_crawl_queue_database locked for deepcopy')
+            crawl_queue = copy.deepcopy(Overseer.crawl_queue)
+            Overseer.crawl_queue.clear()
+        
+        logging.debug(f'Processing crawl_queue to add to database')
+        crawl_queue.sort(key=lambda x: x)
+        unique_ids = list({x.domain[0].id: x for x in crawl_queue}.values())
+        print(len(crawl_queue))
+        for unique_id in unique_ids:
+            crawl_queue_processed = []
+            timestamp = datetime.now()
+
+            for url_domain in crawl_queue:
+                if  url_domain.domain[0].id == unique_id.domain[0].id:
+                    crawl_queue_processed.append(
+                        {
+                            'url': url_domain.url,
+                            'priority': 0,
+                            'timestamp': timestamp,
+                            'domain_id': url_domain.domain[0].id
+                        })
+            try:
+                (CrawlQueueModel
+                    .insert_many(crawl_queue_processed)
+                    .on_conflict(action='IGNORE')
+                    .execute())
+                logging.info(f'Added {len(crawl_queue_processed)} urls to crawl_queue')
+            except Exception as e:
+                logging.info(f'Failed to add {len(crawl_queue_processed)} urls to crawl_queue: {e}')
+        logging.info('Finished adding crawl_queue to database')
+
     def load_url_status(self):
         url_status = [url_status for url_status in UrlStatusModel.select()]
         logging.debug(f'Loading {len(url_status)} url_statuses')

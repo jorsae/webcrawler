@@ -14,14 +14,15 @@ def main():
     fill_url_status_model()
     fill_request_status_model()
     
-    # test_overseer()
-    test_worker()
+    test_overseer()
+    # test_worker()
 
 def test_overseer():
     overseer = Overseer(database)
 
     spider = overseer.create_spider()
-    overseer.start_spider(spider, 'https://jorsae.github.io/CatGameCalculator/')
+    # overseer.start_spider(spider, 'https://jorsae.github.io/CatGameCalculator/')
+    overseer.start_spider(spider, 'https://vg.no')
 
     overseer.run()
 
