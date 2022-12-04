@@ -1,4 +1,5 @@
 import peewee as pw
+import logging
 import threading
 
 from models import database, UrlStatusModel, RequestStatusModel
@@ -10,6 +11,7 @@ class Overseer:
         self.spiders = list()
         self.url_status = self.load_url_status()
         self.request_status = self.load_request_status()
+        logging.debug('Created Overseer')
     
     def create_spider(self):
         worker = Worker(database)
@@ -20,9 +22,14 @@ class Overseer:
     def start_spider(self, spider, url):
         spider.thread = threading.Thread(target=spider.worker.crawl, args=(url, ))
         spider.thread.start()
+        logging.info(f'Starting spider with: {url}')
     
     def load_url_status(self):
-        return [url_status for url_status in UrlStatusModel.select()]
+        url_status = [url_status for url_status in UrlStatusModel.select()]
+        logging.debug(f'Loading {len(url_status)} url_statuses')
+        return url_status
     
     def load_request_status(self):
-        return [request_status for request_status in RequestStatusModel.select()]
+        request_status = [request_status for request_status in RequestStatusModel.select()]
+        logging.debug(f'Loading {len(request_status)} request_status')
+        return request_status

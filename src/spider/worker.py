@@ -1,4 +1,5 @@
 import peewee as pw
+import logging
 import requests
 import urllib
 import urllib.robotparser as rp
@@ -17,6 +18,7 @@ class Worker:
         self.last_robots_domain = ''
         self.domain = None
         self.crawl_history = []
+        logging.debug('Created Worker')
     
     def crawl(self, start_url = None):
         if start_url is not None:
@@ -40,6 +42,7 @@ class Worker:
             
             urls = processor.url.get_urls(url, req.text)
             self.store_urls(urls)
+        logging.info('Worker finished crawl')
     
     def ensure_parsed(self, url):
         if urlparse(url).netloc is not self.last_robots_domain:
@@ -68,8 +71,9 @@ class Worker:
                 .insert_many(crawl_queue)
                 .on_conflict(action='IGNORE')
                 .execute())
+            logging.info(f'Added {len(crawl_queue)} urls to crawl_queue')
         except Exception as e:
-            print(e)
+            logging.info(f'Failed to add {len(crawl_queue)} urls to crawl_queue: {e}')
 
     def get_robots_url(self, url):
         uparse = urlparse(url)
@@ -81,8 +85,12 @@ class Worker:
         try:
             self.robot_parser.read()
             self.last_robots_domain = urlparse(robots_url).netloc
-        except urllib.error.URLError:
+        except urllib.error.URLError as url_exception:
+            logging.error(f'Failed parsing robots: {robots_url}\t {url_exception}')
             return UrlStatus.SSL_VERIFICATION_FAILED
-        except:
+        except Exception as e:
+            logging.error(f'Failed parsing robots: {robots_url}\t {e}')
             return UrlStatus.ERROR
+        
+        logging.info(f'Parsed robots: {robots_url}')
         return UrlStatus.OK

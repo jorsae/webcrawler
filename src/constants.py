@@ -1,1 +1,2 @@
 DATABASE_FILE = 'webcrawler.db'
+MAX_URLS_BEFORE_STORING = 10
