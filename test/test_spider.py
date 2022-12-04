@@ -14,3 +14,13 @@ spider = Spider(None)
 def test_get_robots_url(url, expected):
     robots_url = spider.get_robots_url(url)
     assert(robots_url) == expected
+
+
+@pytest.mark.parametrize("robots_url, expected", [
+    ("https://www.youtube.com/robots.txt", "www.youtube.com"),
+    ("https://youtube.com/robots.txt", "youtube.com"),
+    ("https://www.google.com/robots.txt", "www.google.com"),
+])
+def test_parse_robots(robots_url, expected):
+    spider.parse_robots(robots_url)
+    assert(spider.last_robots_domain) == expected
