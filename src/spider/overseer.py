@@ -11,10 +11,15 @@ class Overseer:
         self.url_status = self.load_url_status()
         self.request_status = self.load_request_status()
     
-    def start_spider(self, url):
+    def create_spider(self):
         worker = Worker(database)
-        spider = Spider(worker, None)
+        spider = Spider(worker)
         self.spiders.append(spider)
+        return spider
+    
+    def start_spider(self, spider, url):
+        spider.thread = threading.Thread(target=spider.worker.crawl, args=(url, ))
+        spider.thread.start()
     
     def load_url_status(self):
         return [url_status for url_status in UrlStatusModel.select()]

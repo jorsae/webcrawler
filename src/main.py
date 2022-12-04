@@ -10,12 +10,18 @@ def main():
     fill_request_status_model()
     
     test_overseer()
-    test_worker()
+    # test_worker()
 
 def test_overseer():
     overseer = Overseer(database)
     print(overseer.url_status)
     print(overseer.request_status)
+
+    spider = overseer.create_spider()
+    print(spider)
+    overseer.start_spider(spider, 'https://jorsae.github.io/CatGameCalculator/')
+
+    print(spider.thread)
 
 def test_worker():
     worker = Worker(database)

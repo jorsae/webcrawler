@@ -50,8 +50,7 @@ class Worker:
                             .where(UrlStatusModel.url_status == url_status.name)
                             .get())
             self.domain = DomainModel.get_or_create(domain=self.last_robots_domain, url_status_id=url_status_id)
-            print(f'{self.domain=}')
-
+    
     def store_urls(self, urls):
         crawl_queue = []
         timestamp = datetime.now()
