@@ -43,8 +43,8 @@ class Worker:
             except Exception as e:
                 continue
             
-            urls = processor.url.get_urls(url, req.text)
-            self.store_urls(urls)
+            url_domains = processor.url.get_urls(url, req.text)
+            self.store_urls(url_domains)
             self.crawl_history.append(url)
         logging.info('Worker finished crawl')
     
@@ -56,16 +56,17 @@ class Worker:
                             .select(UrlStatusModel.id)
                             .where(UrlStatusModel.url_status == url_status.name)
                             .get())
-            self.domain = UrlDomain(url)
+            self.domain = UrlDomain(url, url_status_id)
     
-    def store_urls(self, urls):
+    def store_urls(self, url_domains):
         # TODO: Make this sort and bulk insert
-        for url in urls:
-            domain = urlparse(url).netloc
+        url_domains.sort(key=lambda x: x.domain)
+        for url_domain in url_domains:
+            print(url_domain)
+            domain = urlparse(url_domain.url).netloc
             domain = DomainModel.get_or_create(domain=domain)
-            print(domain[0].id)
             (CrawlQueueModel
-                .insert(url=url, priority=0, timestamp=datetime.now(), domain_id=domain[0])
+                .insert(url=url_domain.url, priority=0, timestamp=datetime.now(), domain_id=domain[0])
                 .on_conflict(action='IGNORE')
                 .execute()
             )

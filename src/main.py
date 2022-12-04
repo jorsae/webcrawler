@@ -19,16 +19,9 @@ def main():
 
 def test_overseer():
     overseer = Overseer(database)
-    print(overseer.url_status)
-    print(overseer.request_status)
 
     spider = overseer.create_spider()
-    print(spider)
     overseer.start_spider(spider, 'https://jorsae.github.io/CatGameCalculator/')
-
-    print(spider.thread.is_alive())
-    time.sleep(1)
-    print(spider.thread.is_alive())
 
     overseer.run()
 
