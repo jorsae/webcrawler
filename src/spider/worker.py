@@ -40,17 +40,21 @@ class Worker:
 
     def store_urls(self, urls):
         crawl_queue = []
+        timestamp = datetime.now()
 
         for url in urls:
             crawl_queue.append(
                 {
                     'url': url,
                     'priority': 0,
-                    'timestamp': datetime.now(),
+                    'timestamp': timestamp,
                     'domain_id': self.domain[0]
                 })
         try:
-            CrawlQueueModel.insert_many(crawl_queue).execute()
+            (CrawlQueueModel
+                .insert_many(crawl_queue)
+                .on_conflict(action='IGNORE')
+                .execute())
         except Exception as e:
             print(e)
 

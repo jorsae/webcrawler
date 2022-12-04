@@ -11,6 +11,7 @@ def main():
 def test():
     worker = Worker(database)
     worker.crawl('https://jorsae.github.io/CatGameCalculator/')
+    worker.crawl('https://vg.no')
 
 def fill_url_code_model():
     for url_code in utility.UrlCode.UrlCode:
