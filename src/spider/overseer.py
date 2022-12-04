@@ -18,7 +18,7 @@ class Overseer:
             with Overseer.crawl_queue_lock:
                 Overseer.crawl_queue += value
         except Exception as e:
-            print(e)
+            logging.critical('Failed to add items to crawl_queue')
 
     def __init__(self, database):
         self.database = database
@@ -69,7 +69,6 @@ class Overseer:
         logging.debug(f'Processing crawl_queue to add to database')
         crawl_queue.sort(key=lambda x: x)
         unique_ids = list({x.domain[0].id: x for x in crawl_queue}.values())
-        print(len(crawl_queue))
         for unique_id in unique_ids:
             crawl_queue_processed = []
             timestamp = datetime.now()
