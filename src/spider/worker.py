@@ -52,44 +52,36 @@ class Worker:
         if urlparse(url).netloc != self.last_robots_domain:
             robots_url = self.get_robots_url(url)
             url_status = self.parse_robots(robots_url)
-            url_status_id = (UrlStatusModel
-                            .select(UrlStatusModel.id)
-                            .where(UrlStatusModel.url_status == url_status.name)
-                            .get())
-            self.domain = UrlDomain(url, url_status_id)
+            self.domain = UrlDomain(url)
     
     def store_urls(self, url_domains):
         # TODO: Make this sort and bulk insert
-        url_domains.sort(key=lambda x: x.domain)
-        for url_domain in url_domains:
-            print(url_domain)
-            domain = urlparse(url_domain.url).netloc
-            domain = DomainModel.get_or_create(domain=domain)
-            (CrawlQueueModel
-                .insert(url=url_domain.url, priority=0, timestamp=datetime.now(), domain_id=domain[0])
-                .on_conflict(action='IGNORE')
-                .execute()
-            )
-        return
+        url_domains.sort(key=lambda x: x)
+        unique_ids = list({x.domain[0].id: x for x in url_domains}.values())
+        for unique_id in unique_ids:
+            crawl_queue = []
+            timestamp = datetime.now()
 
-        crawl_queue = []
-        timestamp = datetime.now()
-        for url in urls:
-            crawl_queue.append(
-                {
-                    'url': url,
-                    'priority': 0,
-                    'timestamp': timestamp,
-                    'domain_id': self.domain[0]
-                })
-        try:
-            (CrawlQueueModel
-                .insert_many(crawl_queue)
-                .on_conflict(action='IGNORE')
-                .execute())
-            logging.info(f'Added {len(crawl_queue)} urls to crawl_queue')
-        except Exception as e:
-            logging.info(f'Failed to add {len(crawl_queue)} urls to crawl_queue: {e}')
+            for url_domain in url_domains:
+                if  url_domain.domain[0].id == unique_id.domain[0].id:
+                    crawl_queue.append(
+                        {
+                            'url': url_domain.url,
+                            'priority': 0,
+                            'timestamp': timestamp,
+                            'domain_id': url_domain.domain[0].id
+                        })
+            try:
+                print(f'Filter: {unique_id.domain[0]}')
+                print(f'ADDING: {len(crawl_queue)}')
+                print(f'{crawl_queue}')
+                (CrawlQueueModel
+                    .insert_many(crawl_queue)
+                    .on_conflict(action='IGNORE')
+                    .execute())
+                logging.info(f'Added {len(crawl_queue)} urls to crawl_queue')
+            except Exception as e:
+                logging.info(f'Failed to add {len(crawl_queue)} urls to crawl_queue: {e}')
 
     def get_robots_url(self, url):
         uparse = urlparse(url)

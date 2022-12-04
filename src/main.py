@@ -14,8 +14,8 @@ def main():
     fill_url_status_model()
     fill_request_status_model()
     
-    test_overseer()
-    # test_worker()
+    # test_overseer()
+    test_worker()
 
 def test_overseer():
     overseer = Overseer(database)
@@ -27,8 +27,8 @@ def test_overseer():
 
 def test_worker():
     worker = Worker(database)
-    worker.crawl('https://jorsae.github.io/CatGameCalculator/')
-    worker.crawl('https://vg.no')
+    # worker.crawl('https://vg.no')
+    worker.crawl('https://jorsae.github.io/CatGameCalculator/about.html')
 
 def fill_request_status_model():
     for request_status in utility.RequestStatus.RequestStatus:
