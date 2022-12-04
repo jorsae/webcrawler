@@ -5,8 +5,8 @@ import urllib.robotparser as rp
 from urllib.parse import urlparse
 from datetime import datetime
 
-from models import CrawlQueueModel, DomainModel, UrlCodeModel
-from utility.UrlCode import UrlCode
+from models import CrawlQueueModel, DomainModel, UrlStatusModel
+from utility.UrlStatus import UrlStatus
 import processor
 
 class Worker:
@@ -16,6 +16,7 @@ class Worker:
         self.robot_parser = None
         self.last_robots_domain = ''
         self.domain = None
+        self.crawl_history = []
     
     def crawl(self, start_url = None):
         if start_url is not None:
@@ -24,8 +25,15 @@ class Worker:
         while len(self.queue) > 0:
             url = self.queue.pop()
             self.ensure_parsed(url)
+            try:
+                req = requests.get(url)
+            except requests.Timeout:
+                continue
+            except requests.ConnectionError:
+                continue
+            except Exception as e:
+                continue
             
-            req = requests.get(url)
             urls = processor.url.get_urls(url, req.text)
             self.store_urls(urls)
     
@@ -33,8 +41,8 @@ class Worker:
         if urlparse(url).netloc is not self.last_robots_domain:
             robots_url = self.get_robots_url(url)
             url_code = self.parse_robots(robots_url)
-            url_code_id = (UrlCodeModel
-                            .select(UrlCodeModel.id)
+            url_code_id = (UrlStatusModel
+                            .select(UrlStatusModel.id)
                             .where(url_code == url_code))
             self.domain = DomainModel.get_or_create(domain=self.last_robots_domain, url_code_id=url_code_id)
 
@@ -69,7 +77,7 @@ class Worker:
             self.robot_parser.read()
             self.last_robots_domain = urlparse(robots_url).netloc
         except urllib.error.URLError:
-            return UrlCode.SSL_VERIFICATION_FAILED
+            return UrlStatus.SSL_VERIFICATION_FAILED
         except:
-            return UrlCode.ERROR
-        return UrlCode.OK
+            return UrlStatus.ERROR
+        return UrlStatus.OK

@@ -1,5 +1,6 @@
 from models.BaseModel import BaseModel, database
-from models.UrlCodeModel import UrlCodeModel
+from models.UrlStatusModel import UrlStatusModel
+from models.RequestStatusModel import RequestStatusModel
 from models.DomainModel import DomainModel
 
 from models.CrawlQueueModel import CrawlQueueModel

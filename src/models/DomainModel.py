@@ -1,10 +1,10 @@
 import peewee as pw
-from models import BaseModel, UrlCodeModel
+from models import BaseModel, UrlStatusModel
 
 class DomainModel(BaseModel):
     id = pw.AutoField(primary_key=True)
     domain = pw.TextField()
-    url_code_id = pw.ForeignKeyField(UrlCodeModel, to_field='id')
+    url_code_id = pw.ForeignKeyField(UrlStatusModel, to_field='id')
 
     class Meta:
         table_name = 'Domain'
