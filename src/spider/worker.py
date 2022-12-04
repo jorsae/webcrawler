@@ -35,19 +35,19 @@ class Worker:
             try:
                 req = requests.get(url_domain.url)
                 url_domain.http_status_code = req.status_code
-                url_domain.requests_status = RequestStatus.OK
+                url_domain.request_status = RequestStatus.OK
                 harvested_urls = processor.url.get_urls(url_domain.url, req.text)
                 spider.Overseer.add_crawl_queue(harvested_urls)
             except requests.Timeout:
-                url_domain.requests_status = RequestStatus.OK
+                url_domain.request_status = RequestStatus.OK
             except requests.ConnectionError:
-                url_domain.requests_status = RequestStatus.CONNECTION_ERROR
+                url_domain.request_status = RequestStatus.CONNECTION_ERROR
             except requests.HTTPError:
-                url_domain.requests_status = RequestStatus.HTTP_ERROR
+                url_domain.request_status = RequestStatus.HTTP_ERROR
             except requests.URLRequired:
-                url_domain.requests_status = RequestStatus.URL_ERROR
+                url_domain.request_status = RequestStatus.URL_ERROR
             except Exception as e:
-                url_domain.requests_status = RequestStatus.ERROR
+                url_domain.request_status = RequestStatus.ERROR
             
             spider.Overseer.add_crawl_history(url_domain)
         logging.info('Worker finished crawl')

@@ -29,7 +29,6 @@ class Overseer:
     def add_crawl_history(value):
         try:
             with Overseer.crawl_history_lock:
-                print(f'{type(value)=}')
                 if type(value) == list:
                     Overseer.crawl_history += value
                 else:
@@ -55,7 +54,6 @@ class Overseer:
                 self.add_crawl_queue_database()
             
             if len(Overseer.crawl_history) >= constants.MAX_URLS_IN_CRAWL_HISTORY:
-                print(f'{Overseer.crawl_history=}')
                 self.add_crawl_history_database()
             time.sleep(1)
     
@@ -134,7 +132,7 @@ class Overseer:
                             'url': url_domain.url,
                             'timestamp': timestamp,
                             'http_status_code': url_domain.http_status_code,
-                            'request_status': url_domain.request_status,
+                            'request_status': self.request_status[url_domain.request_status.name],
                             'domain_id': url_domain.domain[0].id
                         })
             try:
@@ -148,11 +146,18 @@ class Overseer:
         logging.info('Finished adding crawl_history to database')
 
     def load_url_status(self):
-        url_status = [url_status for url_status in UrlStatusModel.select()]
-        logging.debug(f'Loading {len(url_status)} url_statuses')
+        url_status = list(UrlStatusModel.select())
+        url_status_dict = {}
+        for us in url_status:
+            url_status_dict[us.url_status] = us.id
+        logging.debug(f'loaded {len(url_status)} url_statuses')
         return url_status
     
     def load_request_status(self):
-        request_status = [request_status for request_status in RequestStatusModel.select()]
-        logging.debug(f'Loading {len(request_status)} request_status')
-        return request_status
+        request_status_dict = {}
+        request_status = list(RequestStatusModel.select())
+        for rs in request_status:
+            request_status_dict[rs.request_status] = rs.id
+        
+        logging.debug(f'Loaded {len(request_status)} request_status')
+        return request_status_dict
