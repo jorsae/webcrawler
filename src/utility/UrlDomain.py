@@ -6,6 +6,8 @@ class UrlDomain:
         self.url = url
         domain = urlparse(url).netloc
         self.domain = DomainModel.get_or_create(domain=domain)
+        self.http_status_code = -1
+        self.request_status = -1
     
 
     def __eq__(self, other):

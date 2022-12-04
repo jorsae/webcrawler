@@ -9,6 +9,7 @@ from datetime import datetime
 from models import CrawlQueueModel, DomainModel, UrlStatusModel
 import spider
 from utility.UrlStatus import UrlStatus
+from utility.RequestStatus import RequestStatus
 from utility.UrlDomain import UrlDomain
 import processor
 
@@ -29,24 +30,26 @@ class Worker:
             self.queue.add(start_url)
         
         while len(self.queue) > 0:
-            url = self.queue.pop()
-            self.ensure_robots_parsed(url)
+            url_domain = UrlDomain(self.queue.pop())
+            self.ensure_robots_parsed(url_domain.url)
             try:
-                req = requests.get(url)
+                req = requests.get(url_domain.url)
+                url_domain.http_status_code = req.status_code
+                url_domain.requests_status = RequestStatus.OK
+                harvested_urls = processor.url.get_urls(url_domain.url, req.text)
+                spider.Overseer.add_crawl_queue(harvested_urls)
             except requests.Timeout:
-                continue
+                url_domain.requests_status = RequestStatus.OK
             except requests.ConnectionError:
-                continue
+                url_domain.requests_status = RequestStatus.CONNECTION_ERROR
             except requests.HTTPError:
-                continue
+                url_domain.requests_status = RequestStatus.HTTP_ERROR
             except requests.URLRequired:
-                continue
+                url_domain.requests_status = RequestStatus.URL_ERROR
             except Exception as e:
-                continue
+                url_domain.requests_status = RequestStatus.ERROR
             
-            url_domains = processor.url.get_urls(url, req.text)
-            spider.Overseer.add_crawl_queue(url_domains)
-            self.crawl_history.append(url)
+            spider.Overseer.add_crawl_history(url_domain)
         logging.info('Worker finished crawl')
     
     def ensure_robots_parsed(self, url):

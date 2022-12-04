@@ -16,9 +16,26 @@ class Overseer:
     def add_crawl_queue(value):
         try:
             with Overseer.crawl_queue_lock:
-                Overseer.crawl_queue += value
+                if type(value) == list:
+                    Overseer.crawl_queue += value
+                else:
+                    Overseer.crawl_history.append(value)
         except Exception as e:
             logging.critical('Failed to add items to crawl_queue')
+
+    crawl_history = list()
+    crawl_history_lock = threading.Lock()
+    @staticmethod
+    def add_crawl_history(value):
+        try:
+            with Overseer.crawl_history_lock:
+                print(f'{type(value)=}')
+                if type(value) == list:
+                    Overseer.crawl_history += value
+                else:
+                    Overseer.crawl_history.append(value)
+        except Exception as e:
+            logging.critical('Failed to add items to crawl_history')
 
     def __init__(self, database):
         self.database = database
@@ -34,8 +51,12 @@ class Overseer:
                     spider.thread.handled = True
                     self.restart_spider(spider)
             
-            if len(Overseer.crawl_queue) > constants.MAX_URLS_IN_CRAWL_QUEUE:
+            if len(Overseer.crawl_queue) >= constants.MAX_URLS_IN_CRAWL_QUEUE:
                 self.add_crawl_queue_database()
+            
+            if len(Overseer.crawl_history) >= constants.MAX_URLS_IN_CRAWL_HISTORY:
+                print(f'{Overseer.crawl_history=}')
+                self.add_crawl_history_database()
             time.sleep(1)
     
     def restart_spider(self, spider):
@@ -91,6 +112,40 @@ class Overseer:
             except Exception as e:
                 logging.info(f'Failed to add {len(crawl_queue_processed)} urls to crawl_queue: {e}')
         logging.info('Finished adding crawl_queue to database')
+
+    def add_crawl_history_database(self):
+        logging.info(f'Adding items to crawl_history: {len(Overseer.crawl_history)}')
+        with Overseer.crawl_history_lock:
+            logging.debug(f'add_crawl_history_database locked for deepcopy')
+            crawl_history = copy.deepcopy(Overseer.crawl_history)
+            Overseer.crawl_history.clear()
+        
+        logging.debug(f'Processing crawl_history to add to database')
+        crawl_history.sort(key=lambda x: x)
+        unique_ids = list({x.domain[0].id: x for x in crawl_history}.values())
+        for unique_id in unique_ids:
+            crawl_history_processed = []
+            timestamp = datetime.now()
+
+            for url_domain in crawl_history:
+                if  url_domain.domain[0].id == unique_id.domain[0].id:
+                    crawl_history_processed.append(
+                        {
+                            'url': url_domain.url,
+                            'timestamp': timestamp,
+                            'http_status_code': url_domain.http_status_code,
+                            'request_status': url_domain.request_status,
+                            'domain_id': url_domain.domain[0].id
+                        })
+            try:
+                (CrawlHistoryModel
+                    .insert_many(crawl_history_processed)
+                    .on_conflict(action='IGNORE')
+                    .execute())
+                logging.info(f'Added {len(crawl_history_processed)} urls to crawl_history')
+            except Exception as e:
+                logging.info(f'Failed to add {len(crawl_history_processed)} urls to crawl_history: {e}')
+        logging.info('Finished adding crawl_history to database')
 
     def load_url_status(self):
         url_status = [url_status for url_status in UrlStatusModel.select()]
