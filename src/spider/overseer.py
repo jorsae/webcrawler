@@ -58,6 +58,9 @@ class Overseer:
             time.sleep(1)
     
     def restart_spider(self, spider):
+        # TODO: Store domain that other spiders are currently crawling.
+        # If no more urls on the current domain on the spider. assign cit random domain
+        # That NO other spider have.
         if len(spider.worker.queue) <= 0:
             urls = (CrawlQueueModel.select(CrawlQueueModel.url)
                     .where(CrawlQueueModel.domain_id == spider.worker.domain.domain[0])
@@ -122,18 +125,19 @@ class Overseer:
         crawl_history.sort(key=lambda x: x)
         unique_ids = list({x.domain[0].id: x for x in crawl_history}.values())
         for unique_id in unique_ids:
+            domain_id = unique_id.domain[0].id
             crawl_history_processed = []
             timestamp = datetime.now()
 
             for url_domain in crawl_history:
-                if  url_domain.domain[0].id == unique_id.domain[0].id:
+                if  url_domain.domain[0].id == domain_id:
                     crawl_history_processed.append(
                         {
                             'url': url_domain.url,
                             'timestamp': timestamp,
                             'http_status_code': url_domain.http_status_code,
                             'request_status': self.request_status[url_domain.request_status.name],
-                            'domain_id': url_domain.domain[0].id
+                            'domain_id': domain_id
                         })
             try:
                 (CrawlHistoryModel

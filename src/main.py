@@ -21,8 +21,8 @@ def test_overseer():
     overseer = Overseer(database)
 
     spider = overseer.create_spider()
-    overseer.start_spider(spider, 'https://jorsae.github.io/CatGameCalculator/')
-    # overseer.start_spider(spider, 'https://vg.no')
+    # overseer.start_spider(spider, 'https://jorsae.github.io/CatGameCalculator/')
+    overseer.start_spider(spider, 'https://vg.no')
 
     overseer.run()
 

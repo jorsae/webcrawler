@@ -50,6 +50,7 @@ class Worker:
                 url_domain.request_status = RequestStatus.ERROR
             
             spider.Overseer.add_crawl_history(url_domain)
+            # TODO: Remove the url from crawl_queue in database
         logging.info('Worker finished crawl')
     
     def ensure_robots_parsed(self, url):
