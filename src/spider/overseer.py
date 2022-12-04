@@ -1,8 +1,10 @@
 import peewee as pw
 import logging
+import time
 import threading
 
-from models import database, UrlStatusModel, RequestStatusModel
+import constants
+from models import *
 from spider import Spider, Worker
 
 class Overseer:
@@ -13,13 +15,34 @@ class Overseer:
         self.request_status = self.load_request_status()
         logging.debug('Created Overseer')
     
+    def run(self):
+        while True:
+            for spider in self.spiders:
+                if not spider.thread.is_alive():
+                    spider.thread.handled = True
+                    self.restart_spider(spider)
+            time.sleep(1)
+    
+    def restart_spider(self, spider):
+        print(f'{spider.worker.domain[0]=}')
+        print(f'{spider.worker.domain=}')
+        if len(spider.worker.queue) <= 0:
+            urls = (CrawlQueueModel.select(CrawlQueueModel.url)
+                    .where(CrawlQueueModel.domain_id == spider.worker.domain[0])
+                    .limit(constants.MAXIMUM_URLS_IN_WORKER_QUEUE)
+                    )
+            for url in urls:
+                print(f'{url.url=}')
+                spider.worker.queue.add(url.url)
+            self.start_spider(spider)
+
     def create_spider(self):
         worker = Worker(database)
         spider = Spider(worker)
         self.spiders.append(spider)
         return spider
     
-    def start_spider(self, spider, url):
+    def start_spider(self, spider, url=None):
         spider.thread = threading.Thread(target=spider.worker.crawl, args=(url, ))
         spider.thread.start()
         logging.info(f'Starting spider with: {url}')

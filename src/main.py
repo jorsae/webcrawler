@@ -1,4 +1,5 @@
 import peewee as pw
+import time
 from models import *
 from spider import Worker, Overseer
 import logging
@@ -25,7 +26,11 @@ def test_overseer():
     print(spider)
     overseer.start_spider(spider, 'https://jorsae.github.io/CatGameCalculator/')
 
-    print(spider.thread)
+    print(spider.thread.is_alive())
+    time.sleep(1)
+    print(spider.thread.is_alive())
+
+    overseer.run()
 
 def test_worker():
     worker = Worker(database)

@@ -21,6 +21,7 @@ class Worker:
         logging.debug('Created Worker')
     
     def crawl(self, start_url = None):
+        logging.info('Worker starting crawl')
         if start_url is not None:
             self.queue.add(start_url)
         
@@ -45,7 +46,7 @@ class Worker:
         logging.info('Worker finished crawl')
     
     def ensure_parsed(self, url):
-        if urlparse(url).netloc is not self.last_robots_domain:
+        if urlparse(url).netloc != self.last_robots_domain:
             robots_url = self.get_robots_url(url)
             url_status = self.parse_robots(robots_url)
             url_status_id = (UrlStatusModel
@@ -55,9 +56,20 @@ class Worker:
             self.domain = DomainModel.get_or_create(domain=self.last_robots_domain, url_status_id=url_status_id)
     
     def store_urls(self, urls):
+        # TODO: Make this sort and bulk insert
         crawl_queue = []
-        timestamp = datetime.now()
+        for url in urls:
+            domain = urlparse(url).netloc
+            domain = DomainModel.get_or_create(domain=domain)
+            print(domain[0].id)
+            (CrawlQueueModel
+                .insert(url=url, priority=0, timestamp=datetime.now(), domain_id=domain[0])
+                .on_conflict(action='IGNORE')
+                .execute()
+            )
+        return
 
+        timestamp = datetime.now()
         for url in urls:
             crawl_queue.append(
                 {

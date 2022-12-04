@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+import logging
 import re
 from urllib.parse import urlparse, urljoin
 
@@ -11,6 +12,7 @@ re_url = re.compile(
     r'(?:/?|[/?]\S+)$', re.IGNORECASE)
 
 def get_urls(url, content):
+    logging.debug(f'Processing: {url}')
     soup = BeautifulSoup(content, "lxml")
     urls = []
     for link in soup.findAll('a', href=True):
