@@ -31,6 +31,10 @@ class Worker:
                 continue
             except requests.ConnectionError:
                 continue
+            except requests.HTTPError:
+                continue
+            except requests.URLRequired:
+                continue
             except Exception as e:
                 continue
             

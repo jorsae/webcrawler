@@ -6,8 +6,8 @@ class CrawlHistoryModel(BaseModel):
     url = pw.TextField()
     timestamp = pw.DateTimeField()
     http_status_code = pw.SmallIntegerField()
-    domain_id = pw.ForeignKeyField(DomainModel, to_field='id')
     request_status = pw.ForeignKeyField(RequestStatusModel, to_field='id')
+    domain_id = pw.ForeignKeyField(DomainModel, to_field='id')
 
     class Meta:
         table_name = 'CrawlHistory'
