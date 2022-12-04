@@ -8,6 +8,7 @@ from datetime import datetime
 
 from models import CrawlQueueModel, DomainModel, UrlStatusModel
 from utility.UrlStatus import UrlStatus
+from utility.UrlDomain import UrlDomain
 import processor
 
 class Worker:
@@ -17,6 +18,7 @@ class Worker:
         self.robot_parser = None
         self.last_robots_domain = ''
         self.domain = None
+        self.harvested_urls = set()
         self.crawl_history = []
         logging.debug('Created Worker')
     
@@ -27,7 +29,7 @@ class Worker:
         
         while len(self.queue) > 0:
             url = self.queue.pop()
-            self.ensure_parsed(url)
+            self.ensure_robots_parsed(url)
             try:
                 req = requests.get(url)
             except requests.Timeout:
@@ -43,9 +45,10 @@ class Worker:
             
             urls = processor.url.get_urls(url, req.text)
             self.store_urls(urls)
+            self.crawl_history.append(url)
         logging.info('Worker finished crawl')
     
-    def ensure_parsed(self, url):
+    def ensure_robots_parsed(self, url):
         if urlparse(url).netloc != self.last_robots_domain:
             robots_url = self.get_robots_url(url)
             url_status = self.parse_robots(robots_url)
@@ -53,11 +56,10 @@ class Worker:
                             .select(UrlStatusModel.id)
                             .where(UrlStatusModel.url_status == url_status.name)
                             .get())
-            self.domain = DomainModel.get_or_create(domain=self.last_robots_domain, url_status_id=url_status_id)
+            self.domain = UrlDomain(url)
     
     def store_urls(self, urls):
         # TODO: Make this sort and bulk insert
-        crawl_queue = []
         for url in urls:
             domain = urlparse(url).netloc
             domain = DomainModel.get_or_create(domain=domain)
@@ -69,6 +71,7 @@ class Worker:
             )
         return
 
+        crawl_queue = []
         timestamp = datetime.now()
         for url in urls:
             crawl_queue.append(

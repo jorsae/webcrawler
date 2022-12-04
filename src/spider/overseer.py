@@ -24,11 +24,11 @@ class Overseer:
             time.sleep(1)
     
     def restart_spider(self, spider):
-        print(f'{spider.worker.domain[0]=}')
-        print(f'{spider.worker.domain=}')
+        print(f'{spider.worker.domain.domain[0]=}')
+        print(f'{spider.worker.domain.domain=}')
         if len(spider.worker.queue) <= 0:
             urls = (CrawlQueueModel.select(CrawlQueueModel.url)
-                    .where(CrawlQueueModel.domain_id == spider.worker.domain[0])
+                    .where(CrawlQueueModel.domain_id == spider.worker.domain.domain[0])
                     .limit(constants.MAXIMUM_URLS_IN_WORKER_QUEUE)
                     )
             for url in urls:
