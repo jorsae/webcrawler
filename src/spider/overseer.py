@@ -41,22 +41,25 @@ class Overseer:
         self.spiders = list()
         self.url_status = self.load_url_status()
         self.request_status = self.load_request_status()
+
+        self.__spider_ids = 0
         logging.debug('Created Overseer')
     
     def run(self):
         while True:
             for spider in self.spiders:
-                if not spider.thread.is_alive():
-                    spider.thread.handled = True
-                    self.get_spider_urls(spider)
-                    self.start_spider(spider)
+                if spider.thread is not None:
+                    if not spider.thread.is_alive():
+                        spider.thread.handled = True
+                        self.get_spider_urls(spider)
+                        self.start_spider(spider.id)
             
             if len(Overseer.crawl_queue) >= constants.MAX_URLS_IN_CRAWL_QUEUE:
                 self.add_crawl_queue_database()
             
             if len(Overseer.crawl_history) >= constants.MAX_URLS_IN_CRAWL_HISTORY:
                 self.add_crawl_history_database()
-            print(f'{len(Overseer.crawl_queue)=} {len(Overseer.crawl_history)=}')
+            
             time.sleep(1)
     
     def get_spider_urls(self, spider):
@@ -93,17 +96,20 @@ class Overseer:
     
     def create_spider(self):
         worker = Worker(database)
-        spider = Spider(worker)
+        spider = Spider(worker, self.__spider_ids)
         self.spiders.append(spider)
+        self.__spider_ids += 1
         return spider
     
-    def start_spider(self, spider, url=None):
-        spider.thread = threading.Thread(target=spider.worker.crawl, args=(url, ))
-        spider.thread.start()
-        logging.info(f'Starting spider with: {url}')
+    def start_spider(self, id, url=None):
+        for spider in self.spiders:
+            if spider.id == id:
+                spider.thread = threading.Thread(target=spider.worker.crawl, args=(url, ))
+                spider.thread.start()
+        logging.info(f'Starting spider {spider.id} with: {url}')
     
     def add_crawl_queue_database(self):
-        logging.info(f'Adding items to crawl_queue: {len(Overseer.crawl_queue)}')
+        logging.debug(f'Adding items to crawl_queue: {len(Overseer.crawl_queue)}')
         with Overseer.crawl_queue_lock:
             logging.debug(f'add_crawl_queue_database locked for deepcopy')
             crawl_queue = copy.deepcopy(Overseer.crawl_queue)
