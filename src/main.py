@@ -14,6 +14,10 @@ def main():
     fill_url_status_model()
     fill_request_status_model()
     
+    # l = logging.getLogger()
+    # print(l.level)
+    # l.level = logging.CRITICAL
+    # print(l.level)
     test_overseer()
     # test_worker()
 

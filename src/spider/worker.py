@@ -49,8 +49,9 @@ class Worker:
             except Exception as e:
                 url_domain.request_status = RequestStatus.ERROR
             
+            # Adding to crawl_history, deleting from crawl_queue
             spider.Overseer.add_crawl_history(url_domain)
-            # TODO: Remove the url from crawl_queue in database
+            CrawlQueueModel.delete().where(CrawlQueueModel.url == url_domain.url).execute()
         logging.info('Worker finished crawl')
     
     def ensure_robots_parsed(self, url):
