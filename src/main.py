@@ -21,8 +21,9 @@ def test_overseer():
     overseer = Overseer(database)
 
     spider = overseer.create_spider()
-    # overseer.start_spider(spider, 'https://jorsae.github.io/CatGameCalculator/')
     overseer.start_spider(spider, 'https://vg.no')
+    # overseer.start_spider(spider, 'https://jorsae.github.io/CatGameCalculator/')
+    # overseer.start_spider(spider)
 
     overseer.run()
 
@@ -52,7 +53,8 @@ def setup_logging():
     if not os.path.isdir(logFolder):
         os.makedirs(logFolder)
     handler = logging.FileHandler(filename=f'{logFolder}/{logFile}', encoding='utf-8', mode='a+')
-    logging.basicConfig(handlers=[handler], level=logging.DEBUG, format='%(asctime)s %(levelname)s:[%(filename)s:%(lineno)d] %(message)s')
+    print_handler = logging.StreamHandler()
+    logging.basicConfig(handlers=[handler, print_handler], level=logging.INFO, format='%(asctime)s %(levelname)s:[%(filename)s:%(lineno)d] %(message)s')
 
 if __name__ == "__main__":
     main()

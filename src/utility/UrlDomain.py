@@ -9,6 +9,8 @@ class UrlDomain:
         self.http_status_code = -1
         self.request_status = -1
     
+    def get_domain_id(self):
+        return self.domain[0].id
 
     def __eq__(self, other):
         if self.domain[0].id == other.domain[0].id:

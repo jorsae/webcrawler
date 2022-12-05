@@ -48,28 +48,49 @@ class Overseer:
             for spider in self.spiders:
                 if not spider.thread.is_alive():
                     spider.thread.handled = True
-                    self.restart_spider(spider)
+                    self.get_spider_urls(spider)
+                    self.start_spider(spider)
             
             if len(Overseer.crawl_queue) >= constants.MAX_URLS_IN_CRAWL_QUEUE:
                 self.add_crawl_queue_database()
             
             if len(Overseer.crawl_history) >= constants.MAX_URLS_IN_CRAWL_HISTORY:
                 self.add_crawl_history_database()
+            print(f'{len(Overseer.crawl_queue)=} {len(Overseer.crawl_history)=}')
             time.sleep(1)
     
-    def restart_spider(self, spider):
-        # TODO: Store domain that other spiders are currently crawling.
-        # If no more urls on the current domain on the spider. assign cit random domain
-        # That NO other spider have.
-        if len(spider.worker.queue) <= 0:
+    def get_spider_urls(self, spider):
+        queue_len = len(spider.worker.queue)
+        # Refill urls with same domain
+        if len(spider.worker.queue) <= 0 and spider.worker.domain is not None:
             urls = (CrawlQueueModel.select(CrawlQueueModel.url)
-                    .where(CrawlQueueModel.domain_id == spider.worker.domain.domain[0])
+                    .where(CrawlQueueModel.domain_id == spider.worker.domain.get_domain_id())
                     .limit(constants.MAXIMUM_URLS_IN_WORKER_QUEUE)
                     )
             for url in urls:
                 spider.worker.queue.add(url.url)
-            self.start_spider(spider)
-
+        
+        # Spider has no domain OR refilling previously had no more urls.
+        # Get new domain for the spider
+        if spider.worker.domain is None or len(spider.worker.queue) <= 0:
+            domains = []
+            for spider in self.spiders:
+                if spider.worker.domain is not None:
+                    domains.append(spider.worker.domain.get_domain_id())
+            
+            new_url = (CrawlQueueModel
+                        .select()
+                        .where(CrawlQueueModel.domain_id.not_in(domains))
+                        .order_by(CrawlQueueModel.priority)
+                        .limit(1)
+                        )
+            if len(new_url) > 0:
+                spider.worker.queue.add(new_url[0].url)
+            else:
+                logging.debug('No urls for the spider')
+        
+        logging.info(f'Filled queue from: {queue_len} --> {len(spider.worker.queue)}')
+    
     def create_spider(self):
         worker = Worker(database)
         spider = Spider(worker)
@@ -105,11 +126,12 @@ class Overseer:
                             'domain_id': url_domain.domain[0].id
                         })
             try:
-                (CrawlQueueModel
-                    .insert_many(crawl_queue_processed)
-                    .on_conflict(action='IGNORE')
-                    .execute())
-                logging.info(f'Added {len(crawl_queue_processed)} urls to crawl_queue')
+                mass_insert_query = (CrawlQueueModel
+                                        .insert_many(crawl_queue_processed)
+                                        .on_conflict(action='IGNORE')
+                                        .as_rowcount()
+                                        .execute())
+                logging.debug(f'Added {mass_insert_query}/{len(crawl_queue_processed)} urls to crawl_queue')
             except Exception as e:
                 logging.info(f'Failed to add {len(crawl_queue_processed)} urls to crawl_queue: {e}')
         logging.info('Finished adding crawl_queue to database')
