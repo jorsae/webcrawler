@@ -33,7 +33,6 @@ class Worker:
             self.ensure_robots_parsed(url_domain.url)
             try:
                 if self.robot_parser.can_fetch('*', url_domain.url):
-                    print(f'can fetch: {url_domain.url}')
                     req = requests.get(url_domain.url)
                     url_domain.http_status_code = req.status_code
                     url_domain.request_status = RequestStatus.OK

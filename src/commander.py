@@ -35,7 +35,6 @@ class Commander(cmd.Cmd):
     
     def do_start_spider(self, arg):
         args = self.parse_args(arg)
-        print(args)
         
         spider = self.overseer.create_spider()
         if len(args) >= 1:
