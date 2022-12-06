@@ -1,10 +1,15 @@
 from models import DomainModel
 from urllib.parse import urlparse
+import logging
 
 class UrlDomain:
     def __init__(self, url):
         self.url = url
-        domain = urlparse(url).netloc
+        try:
+            domain = urlparse(url).netloc
+        except Exception as e:
+            logging.error(e)
+            domain = url
         self.domain = DomainModel.get_or_create(domain=domain)
         self.http_status_code = -1
         self.request_status = -1

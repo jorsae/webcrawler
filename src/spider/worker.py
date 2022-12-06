@@ -1,12 +1,10 @@
-import peewee as pw
 import logging
 import requests
 import urllib
 import urllib.robotparser as rp
 from urllib.parse import urlparse
-from datetime import datetime
 
-from models import CrawlQueueModel, DomainModel, UrlStatusModel
+from models import CrawlQueueModel
 import spider
 from utility.UrlStatus import UrlStatus
 from utility.RequestStatus import RequestStatus
@@ -39,14 +37,19 @@ class Worker:
                 harvested_urls = processor.url.get_urls(url_domain.url, req.text)
                 spider.Overseer.add_crawl_queue(harvested_urls)
             except requests.Timeout:
+                # TODO log
                 url_domain.request_status = RequestStatus.OK
             except requests.ConnectionError:
+                # TODO log
                 url_domain.request_status = RequestStatus.CONNECTION_ERROR
             except requests.HTTPError:
+                # TODO log
                 url_domain.request_status = RequestStatus.HTTP_ERROR
             except requests.URLRequired:
+                # TODO log
                 url_domain.request_status = RequestStatus.URL_ERROR
             except Exception as e:
+                # TODO log
                 url_domain.request_status = RequestStatus.ERROR
             
             # Adding to crawl_history, deleting from crawl_queue
@@ -55,15 +58,22 @@ class Worker:
         logging.info('Worker finished crawl')
     
     def ensure_robots_parsed(self, url):
-        if urlparse(url).netloc != self.last_robots_domain:
-            robots_url = self.get_robots_url(url)
-            url_status = self.parse_robots(robots_url)
-            # TODO: Add url_status_id to UrlDomain
-            self.domain = UrlDomain(url)
+        try:
+            if urlparse(url).netloc != self.last_robots_domain:
+                robots_url = self.get_robots_url(url)
+                url_status = self.parse_robots(robots_url)
+                # TODO: Add url_status_id to UrlDomain
+                self.domain = UrlDomain(url)
+        except Exception as e:
+            logging.error(e)
     
     def get_robots_url(self, url):
-        uparse = urlparse(url)
-        return f'{uparse.scheme}://{uparse.netloc}/robots.txt'
+        try:
+            uparse = urlparse(url)
+            return f'{uparse.scheme}://{uparse.netloc}/robots.txt'
+        except Exception as e:
+            logging.error(e)
+            return url
     
     def parse_robots(self, robots_url):
         self.robot_parser = rp.RobotFileParser()

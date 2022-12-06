@@ -1,4 +1,3 @@
-import peewee as pw
 import logging
 import time
 import threading

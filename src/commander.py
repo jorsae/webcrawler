@@ -1,7 +1,5 @@
-import peewee as pw
 from models import *
-from spider import Worker, Overseer
-import logging
+from spider import Overseer
 import threading
 import cmd
 
