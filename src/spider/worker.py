@@ -1,5 +1,6 @@
 import logging
 import requests
+import time
 import urllib
 import urllib.robotparser as rp
 from urllib.parse import urlparse
@@ -31,14 +32,17 @@ class Worker:
             url_domain = UrlDomain(self.queue.pop())
             self.ensure_robots_parsed(url_domain.url)
             try:
-                req = requests.get(url_domain.url)
-                url_domain.http_status_code = req.status_code
-                url_domain.request_status = RequestStatus.OK
-                harvested_urls = processor.url.get_urls(url_domain.url, req.text)
-                spider.Overseer.add_crawl_queue(harvested_urls)
+                if self.robot_parser.can_fetch('*', url_domain.url):
+                    req = requests.get(url_domain.url)
+                    url_domain.http_status_code = req.status_code
+                    url_domain.request_status = RequestStatus.OK
+                    harvested_urls = processor.url.get_urls(url_domain.url, req.text)
+                    spider.Overseer.add_crawl_queue(harvested_urls)
+                else:
+                    url_domain.request_status = RequestStatus.NOT_ALLOWED
             except requests.Timeout as ex_timeout:
                 logging.warning(ex_timeout)
-                url_domain.request_status = RequestStatus.OK
+                url_domain.request_status = RequestStatus.TIMEOUT
             except requests.ConnectionError as ex_connection_error:
                 logging.warning(ex_connection_error)
                 url_domain.request_status = RequestStatus.CONNECTION_ERROR
@@ -52,10 +56,24 @@ class Worker:
                 logging.warning(e)
                 url_domain.request_status = RequestStatus.ERROR
             
-            # Adding to crawl_history, deleting from crawl_queue
+            # Adding to crawl_history
             spider.Overseer.add_crawl_history(url_domain)
-            CrawlQueueModel.delete().where(CrawlQueueModel.url == url_domain.url).execute()
+            
+            # Deleting from queue
+            self.remove_from_queue(url_domain.url)
+            
+            # Wait, if website has a crawl-delay
+            request_rate = self.robot_parser.request_rate('*')
+            if request_rate is not None:
+                time.sleep(request_rate)
+        
         logging.info('Worker finished crawl')
+    
+    def remove_from_queue(self, url):
+        try:
+            CrawlQueueModel.delete().where(CrawlQueueModel.url == url).execute()
+        except Exception as e:
+            logging.error(e)
     
     def ensure_robots_parsed(self, url):
         try:

@@ -7,3 +7,4 @@ class RequestStatus(Enum):
     HTTP_ERROR = 4
     URL_ERROR = 5
     ERROR = 6
+    NOT_ALLOWED = 7
