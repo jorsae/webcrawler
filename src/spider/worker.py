@@ -64,9 +64,10 @@ class Worker:
             self.remove_from_queue(url_domain.url)
             
             # Wait if website has a crawl-delay
-            request_rate = self.robot_parser.request_rate('*')
-            if request_rate is not None:
-                time.sleep(request_rate)
+            if self.robot_parser is not None:
+                request_rate = self.robot_parser.request_rate('*')
+                if request_rate is not None:
+                    time.sleep(request_rate)
         
         logging.info(f'Worker {self.id} finished crawl')
     
