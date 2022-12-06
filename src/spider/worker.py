@@ -36,20 +36,20 @@ class Worker:
                 url_domain.request_status = RequestStatus.OK
                 harvested_urls = processor.url.get_urls(url_domain.url, req.text)
                 spider.Overseer.add_crawl_queue(harvested_urls)
-            except requests.Timeout:
-                # TODO log
+            except requests.Timeout as ex_timeout:
+                logging.warning(ex_timeout)
                 url_domain.request_status = RequestStatus.OK
-            except requests.ConnectionError:
-                # TODO log
+            except requests.ConnectionError as ex_connection_error:
+                logging.warning(ex_connection_error)
                 url_domain.request_status = RequestStatus.CONNECTION_ERROR
-            except requests.HTTPError:
-                # TODO log
+            except requests.HTTPError as ex_http_error:
+                logging.warning(ex_http_error)
                 url_domain.request_status = RequestStatus.HTTP_ERROR
-            except requests.URLRequired:
-                # TODO log
+            except requests.URLRequired as ex_url_required:
+                logging.warning(ex_url_required)
                 url_domain.request_status = RequestStatus.URL_ERROR
             except Exception as e:
-                # TODO log
+                logging.warning(e)
                 url_domain.request_status = RequestStatus.ERROR
             
             # Adding to crawl_history, deleting from crawl_queue
