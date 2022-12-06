@@ -35,17 +35,13 @@ class Commander(cmd.Cmd):
     
     def do_start_spider(self, arg):
         args = self.parse_args(arg)
-        if len(args) < 1:
-            print('set_spider_url takes 1 arguments: id')
-            return
-        try:
-            if len(args) >= 2:
-                self.overseer.start_spider(args[0], args[1])
-            else:
-                self.overseer.start_spider(args[0])
-        except Exception as e:
-            print(e)
-
+        
+        spider = self.overseer.create_spider()
+        if len(args) > 1:
+            self.overseer.start_spider(spider.id, args[0])
+        else:
+            self.overseer.start_spider(spider.id)
+    
     def do_list_queue(self, arg):
         print(f'{len(Overseer.crawl_queue)=} {len(Overseer.crawl_history)=}')
     

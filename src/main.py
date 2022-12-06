@@ -1,5 +1,4 @@
 import peewee as pw
-import time
 from models import *
 from spider import Worker, Overseer
 import logging
@@ -21,7 +20,7 @@ def main():
     # print(l.level)
     # l.level = logging.CRITICAL
     # print(l.level)
-    test_overseer()
+    # test_overseer()
     # test_worker()
 
 def test_overseer():
