@@ -13,8 +13,9 @@ from utility.UrlDomain import UrlDomain
 import processor
 
 class Worker:
-    def __init__(self, database):
+    def __init__(self, database, id):
         self.database = database
+        self.id = id
         self.queue = set()
         self.robot_parser = None
         self.last_robots_domain = ''
@@ -24,21 +25,22 @@ class Worker:
         logging.debug('Created Worker')
     
     def crawl(self, start_url = None):
-        logging.info('Worker starting crawl')
+        logging.info(f'Worker {self.id} starting crawl')
         if start_url is not None:
             self.queue.add(start_url)
-        
         while len(self.queue) > 0:
             url_domain = UrlDomain(self.queue.pop())
             self.ensure_robots_parsed(url_domain.url)
             try:
                 if self.robot_parser.can_fetch('*', url_domain.url):
+                    print(f'can fetch: {url_domain.url}')
                     req = requests.get(url_domain.url)
                     url_domain.http_status_code = req.status_code
                     url_domain.request_status = RequestStatus.OK
                     harvested_urls = processor.url.get_urls(url_domain.url, req.text)
                     spider.Overseer.add_crawl_queue(harvested_urls)
                 else:
+                    logging.debug(f'[{self.id}] Not allowed to crawl: {url_domain.url}')
                     url_domain.request_status = RequestStatus.NOT_ALLOWED
             except requests.Timeout as ex_timeout:
                 logging.warning(ex_timeout)
@@ -62,12 +64,12 @@ class Worker:
             # Deleting from queue
             self.remove_from_queue(url_domain.url)
             
-            # Wait, if website has a crawl-delay
+            # Wait if website has a crawl-delay
             request_rate = self.robot_parser.request_rate('*')
             if request_rate is not None:
                 time.sleep(request_rate)
         
-        logging.info('Worker finished crawl')
+        logging.info(f'Worker {self.id} finished crawl')
     
     def remove_from_queue(self, url):
         try:
@@ -79,8 +81,9 @@ class Worker:
         try:
             if urlparse(url).netloc != self.last_robots_domain:
                 robots_url = self.get_robots_url(url)
-                url_status = self.parse_robots(robots_url)
+                self.parse_robots(robots_url)
                 # TODO: Add url_status_id to UrlDomain
+                # url_status = self.parse_robots(robots_url)
                 self.domain = UrlDomain(url)
         except Exception as e:
             logging.error(e)
@@ -100,11 +103,11 @@ class Worker:
             self.robot_parser.read()
             self.last_robots_domain = urlparse(robots_url).netloc
         except urllib.error.URLError as url_exception:
-            logging.error(f'Failed parsing robots: {robots_url}\t {url_exception}')
+            logging.error(f'[{self.id}] Failed parsing robots: {robots_url}\t {url_exception}')
             return UrlStatus.SSL_VERIFICATION_FAILED
         except Exception as e:
-            logging.error(f'Failed parsing robots: {robots_url}\t {e}')
+            logging.error(f'[{self.id}] Failed parsing robots: {robots_url}\t {e}')
             return UrlStatus.ERROR
         
-        logging.info(f'Parsed robots: {robots_url}')
+        logging.info(f'[{self.id}] Parsed robots: {robots_url}')
         return UrlStatus.OK

@@ -94,7 +94,7 @@ class Overseer:
         logging.info(f'Filled queue from: {queue_len} --> {len(spider.worker.queue)}')
     
     def create_spider(self):
-        worker = Worker(database)
+        worker = Worker(database, self.__spider_ids)
         spider = Spider(worker, self.__spider_ids)
         self.spiders.append(spider)
         self.__spider_ids += 1
