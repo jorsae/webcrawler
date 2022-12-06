@@ -8,7 +8,7 @@ import constants
 
 def get_urls(url, content):
     logging.debug(f'Processing: {url}')
-    soup = BeautifulSoup(content, "lxml")
+    soup = BeautifulSoup(content, "html.parser")
     urls = []
     for link in soup.findAll('a', href=True):
         link = urljoin(url, link['href'])
