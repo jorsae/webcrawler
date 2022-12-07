@@ -5,6 +5,7 @@ import logging
 import os
 
 import utility
+from utility.UrlStatus import UrlStatus
 
 def main():
     setup_logging()
@@ -12,7 +13,7 @@ def main():
     create_tables()
     fill_url_status_model()
     fill_request_status_model()
-    
+
     from commander import Commander
     Commander().cmdloop()
     

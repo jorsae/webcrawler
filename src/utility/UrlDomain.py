@@ -37,7 +37,6 @@ class UrlDomain:
             return 1
         else:
             return -1
-
-
+    
     def __str__(self):
         return f'{self.domain[0].id}: {self.url}'

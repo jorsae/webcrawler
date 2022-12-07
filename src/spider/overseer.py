@@ -9,6 +9,30 @@ from models import *
 from spider import Spider, Worker
 
 class Overseer:
+    # TODO: Clean this up, as you have to comment this out on first run
+    # To add the statuses to the database
+    @staticmethod
+    def load_url_status():
+        url_status_dict = {}
+        url_status = list(UrlStatusModel.select())
+        for us in url_status:
+            url_status_dict[us.url_status] = us.id
+        logging.debug(f'loaded {len(url_status)} url_statuses')
+        return url_status_dict
+    
+    @staticmethod
+    def load_request_status():
+        request_status_dict = {}
+        request_status = list(RequestStatusModel.select())
+        for rs in request_status:
+            request_status_dict[rs.request_status] = rs.id
+        
+        logging.debug(f'Loaded {len(request_status)} request_status')
+        return request_status_dict
+
+    url_status = load_url_status()
+    request_status = load_request_status()
+
     crawl_queue = list()
     crawl_queue_lock = threading.Lock()
     @staticmethod
@@ -38,8 +62,6 @@ class Overseer:
     def __init__(self, database):
         self.database = database
         self.spiders = list()
-        self.url_status = self.load_url_status()
-        self.request_status = self.load_request_status()
 
         self.__spider_ids = 0
         logging.debug('Created Overseer')
@@ -175,20 +197,3 @@ class Overseer:
             except Exception as e:
                 logging.info(f'Failed to add {len(crawl_history_processed)} urls to crawl_history: {e}')
         logging.info('Finished adding crawl_history to database')
-
-    def load_url_status(self):
-        url_status = list(UrlStatusModel.select())
-        url_status_dict = {}
-        for us in url_status:
-            url_status_dict[us.url_status] = us.id
-        logging.debug(f'loaded {len(url_status)} url_statuses')
-        return url_status
-    
-    def load_request_status(self):
-        request_status_dict = {}
-        request_status = list(RequestStatusModel.select())
-        for rs in request_status:
-            request_status_dict[rs.request_status] = rs.id
-        
-        logging.debug(f'Loaded {len(request_status)} request_status')
-        return request_status_dict
