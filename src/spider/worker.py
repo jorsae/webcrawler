@@ -1,8 +1,6 @@
 import logging
 import requests
 import time
-import urllib
-import urllib.robotparser as rp
 from urllib.parse import urlparse
 
 from models import CrawlQueueModel, DomainModel
@@ -70,7 +68,7 @@ class Worker:
             # Update the domain url_status
             if self.robot_parser.url_status_updated is False:
                 try:
-                    url_status = spider.Overseer.url_status[self.robot_parser.url_status.name]
+                    url_status = spider.Helper.url_status[self.robot_parser.url_status.name]
                     (DomainModel
                         .update({DomainModel.url_status_id: url_status})
                         .where(DomainModel.id == self.domain.get_domain_id())

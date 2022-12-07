@@ -1,6 +1,6 @@
 import peewee as pw
 from models import *
-from spider import Worker, Overseer
+from spider import Worker, Overseer, Helper
 import logging
 import os
 
@@ -13,6 +13,8 @@ def main():
     create_tables()
     fill_url_status_model()
     fill_request_status_model()
+
+    Helper() #initialize the url_status & request_status lists
 
     from commander import Commander
     Commander().cmdloop()

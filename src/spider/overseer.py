@@ -7,32 +7,9 @@ from datetime import datetime
 import constants
 from models import *
 from spider import Spider, Worker
+import spider
 
 class Overseer:
-    # TODO: Clean this up, as you have to comment this out on first run
-    # To add the statuses to the database
-    @staticmethod
-    def load_url_status():
-        url_status_dict = {}
-        url_status = list(UrlStatusModel.select())
-        for us in url_status:
-            url_status_dict[us.url_status] = us.id
-        logging.debug(f'loaded {len(url_status)} url_statuses')
-        return url_status_dict
-    
-    @staticmethod
-    def load_request_status():
-        request_status_dict = {}
-        request_status = list(RequestStatusModel.select())
-        for rs in request_status:
-            request_status_dict[rs.request_status] = rs.id
-        
-        logging.debug(f'Loaded {len(request_status)} request_status')
-        return request_status_dict
-
-    url_status = load_url_status()
-    request_status = load_request_status()
-
     crawl_queue = list()
     crawl_queue_lock = threading.Lock()
     @staticmethod
@@ -185,7 +162,7 @@ class Overseer:
                             'url': url_domain.url,
                             'timestamp': timestamp,
                             'http_status_code': url_domain.http_status_code,
-                            'request_status': self.request_status[url_domain.request_status.name],
+                            'request_status': spider.Helper.request_status[url_domain.request_status.name],
                             'domain_id': domain_id
                         })
             try:
