@@ -73,6 +73,7 @@ class Overseer:
         
         # Spider has no domain OR refilling previously had no more urls.
         # Get new domain for the spider
+        # TODO: If the 1st domain has no urls, it will be stuck with no urls to crawl
         if spider.worker.domain is None or len(spider.worker.queue) <= 0:
             domains = []
             for spider in self.spiders:
