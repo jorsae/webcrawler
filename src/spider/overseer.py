@@ -107,7 +107,7 @@ class Overseer:
         logging.info(f'Starting spider {spider.id} with: {url}')
     
     def add_crawl_queue_database(self):
-        # TODO: Don't allow duplicate entries that match either CrawlHistory or CrawlQueue
+        # TODO: See if this fixed duplicate urls
         logging.debug(f'Adding items to crawl_queue: {len(Overseer.crawl_queue)}')
         with Overseer.crawl_queue_lock:
             logging.debug(f'add_crawl_queue_database locked for deepcopy')
@@ -122,14 +122,15 @@ class Overseer:
             timestamp = datetime.now()
 
             for url_domain in crawl_queue:
-                if  url_domain.domain[0].id == unique_id.domain[0].id:
-                    crawl_queue_processed.append(
-                        {
-                            'url': url_domain.url,
-                            'priority': 0,
-                            'timestamp': timestamp,
-                            'domain_id': url_domain.domain[0].id
-                        })
+                if  url_domain.get_domain_id() == unique_id.get_domain_id():
+                    if self.url_in_database(url_domain.url) is False:
+                        crawl_queue_processed.append(
+                            {
+                                'url': url_domain.url,
+                                'priority': 0,
+                                'timestamp': timestamp,
+                                'domain_id': url_domain.get_domain_id()
+                            })
             try:
                 mass_insert_query = (CrawlQueueModel
                                         .insert_many(crawl_queue_processed)
@@ -140,6 +141,19 @@ class Overseer:
             except Exception as e:
                 logging.info(f'Failed to add {len(crawl_queue_processed)} urls to crawl_queue: {e}')
         logging.info('Finished adding crawl_queue to database')
+
+    def url_in_database(self, url):
+        try:
+            cq = CrawlQueueModel.select().where(CrawlQueueModel.url == url).exists()
+            if cq:
+                return True
+            ch = CrawlHistoryModel.select().where(CrawlHistoryModel.url == url).exists()
+            if ch:
+                return True
+            return False
+        except Exception as e:
+            logging.error(e)
+            return False
 
     def add_crawl_history_database(self):
         logging.info(f'Adding items to crawl_history: {len(Overseer.crawl_history)}')

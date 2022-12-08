@@ -39,7 +39,6 @@ class Helper:
                     .where(DomainModel.id == domain.get_domain_id())
                     .execute()
                 )
-                print(f'{domain} - updated url_status: {url_status}/{robot_parser.url_status.name}')
             return True
         except Exception as e:
             logging.error(e)
