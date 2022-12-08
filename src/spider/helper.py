@@ -32,6 +32,7 @@ class Helper:
     def update_domain_url_status(robot_parser, domain):
         try:
             with spider.Helper.update_domain_url_status_lock:
+                # TODO: if url_status is SSL_VERIFICATION_FAILED or ERROR. Do something?
                 url_status = spider.Helper.url_status[robot_parser.url_status.name]
                 (DomainModel
                     .update({DomainModel.url_status_id: url_status})

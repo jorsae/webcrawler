@@ -9,11 +9,8 @@ class Commander(cmd.Cmd):
     file = None
     
     overseer = Overseer(database)
-    overseer_thread = None
-    
-    def do_start_overseer(self, arg):
-        self.overseer_thread = threading.Thread(target=self.overseer.run)
-        self.overseer_thread.start()
+    overseer_thread = threading.Thread(target=overseer.run)
+    overseer_thread.start()
     
     def do_spiders(self, arg):
         for spider in self.overseer.spiders:

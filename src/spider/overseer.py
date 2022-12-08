@@ -107,6 +107,7 @@ class Overseer:
         logging.info(f'Starting spider {spider.id} with: {url}')
     
     def add_crawl_queue_database(self):
+        # TODO: Don't allow duplicate entries that match either CrawlHistory or CrawlQueue
         logging.debug(f'Adding items to crawl_queue: {len(Overseer.crawl_queue)}')
         with Overseer.crawl_queue_lock:
             logging.debug(f'add_crawl_queue_database locked for deepcopy')
