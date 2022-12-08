@@ -24,7 +24,7 @@ class Helper:
         for rs in request_status:
             request_status_dict[rs.request_status] = rs.id
         
-        logging.debug(f'Loaded {len(request_status)} request_status')
+        logging.debug(f'Loaded {len(request_status)} request_statuses')
         return request_status_dict
     
     update_domain_url_status_lock = threading.Lock()

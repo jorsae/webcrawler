@@ -35,7 +35,7 @@ class RobotParser:
     
     def same_robot(self, url):
         try:
-            if urlparse(url) == self.domain:
+            if urlparse(url).netloc == self.domain:
                 return True
             else:
                 return False

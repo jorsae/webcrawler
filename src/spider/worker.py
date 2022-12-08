@@ -83,15 +83,11 @@ class Worker:
             logging.error(e)
     
     def ensure_robots_parsed(self, url):
-        # TODO: Check if this is triggered everytime?
-        # It seems to fire before crawling everytime.
-        
         # If both passes, it's same url
         if self.robot_parser is not None:
             if self.robot_parser.same_robot(url):
                 return
         
-        # def __init__(self, robot_parser, robot_url, url_status):
         self.robot_parser = RobotParser(self.id, self.get_robots_url(url))
         self.robot_parser.url_status = self.robot_parser.parse()
         self.domain = UrlDomain(url)
