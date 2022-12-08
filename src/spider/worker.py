@@ -64,20 +64,9 @@ class Worker:
             # Deleting from queue
             self.remove_from_queue(url_domain.url)
             
-            
             # Update the domain url_status
             if self.robot_parser.url_status_updated is False:
-                try:
-                    url_status = spider.Helper.url_status[self.robot_parser.url_status.name]
-                    (DomainModel
-                        .update({DomainModel.url_status_id: url_status})
-                        .where(DomainModel.id == self.domain.get_domain_id())
-                        .execute()
-                    )
-                    self.robot_parser.url_status_updated = True
-                    print(f'{self.domain} - updated url_status: {url_status}/{self.robot_parser.url_status.name}')
-                except Exception as e:
-                    logging.error(e)
+                self.robot_parser.url_status_updated = spider.Helper.update_domain_url_status(self.robot_parser, self.domain)
 
             # Wait if website has a crawl-delay
             if self.robot_parser is not None:
@@ -94,6 +83,9 @@ class Worker:
             logging.error(e)
     
     def ensure_robots_parsed(self, url):
+        # TODO: Check if this is triggered everytime?
+        # It seems to fire before crawling everytime.
+        
         # If both passes, it's same url
         if self.robot_parser is not None:
             if self.robot_parser.same_robot(url):
