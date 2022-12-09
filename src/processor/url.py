@@ -7,7 +7,7 @@ from utility.UrlDomain import UrlDomain
 import constants
 
 def get_urls(url, content):
-    logging.debug(f'Processing: {url}')
+    logging.debug(f'get_urls Processing: {url}')
     soup = BeautifulSoup(content, "html.parser")
     urls = []
     for link in soup.findAll('a', href=True):
@@ -16,3 +16,6 @@ def get_urls(url, content):
             urls.append(UrlDomain(link))
     
     return urls
+
+def get_emails(url, content):
+    return re.findall(constants.REGEX_EMAIL_FETCH, content)

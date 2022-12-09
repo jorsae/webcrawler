@@ -66,7 +66,7 @@ class Overseer:
         if len(spider.worker.queue) <= 0 and spider.worker.domain is not None:
             urls = (CrawlQueueModel.select(CrawlQueueModel.url)
                     .where(CrawlQueueModel.domain_id == spider.worker.domain.get_domain_id())
-                    .limit(constants.MAXIMUM_URLS_IN_WORKER_QUEUE)
+                    .limit(constants.MAX_URLS_IN_WORKER_QUEUE)
                     )
             for url in urls:
                 spider.worker.queue.add(url.url)
@@ -140,7 +140,7 @@ class Overseer:
                                         .execute())
                 logging.debug(f'Added {mass_insert_query}/{len(crawl_queue_processed)} urls to crawl_queue')
             except Exception as e:
-                logging.info(f'Failed to add {len(crawl_queue_processed)} urls to crawl_queue: {e}')
+                logging.error(f'Failed to add {len(crawl_queue_processed)} urls to crawl_queue: {e}')
         logging.info('Finished adding crawl_queue to database')
 
     def url_in_database(self, url):

@@ -1,8 +1,10 @@
-from models import UrlStatusModel, RequestStatusModel, DomainModel
+from models import UrlStatusModel, RequestStatusModel, DomainModel, CrawlEmailModel
 import threading
+import copy
 import logging
 
 import spider
+import constants
 
 class Helper:
     url_status = None
@@ -43,7 +45,36 @@ class Helper:
         except Exception as e:
             logging.error(e)
             return False
-
+    
+    crawl_emails = list()
+    crawl_emails_lock = threading.Lock()
+    @staticmethod
+    def add_crawl_email(value):
+        try:
+            with Helper.crawl_emails_lock:
+                if type(value) == list:
+                    Helper.crawl_emails += value
+                else:
+                    Helper.crawl_emails.append(value)
+            print(f'{len(Helper.crawl_emails)=}\n{value=}')
+            if len(Helper.crawl_emails) > constants.MAX_EMAILS_IN_EMAIL_QUEUE:
+                Helper.add_crawl_email_database()
+        except Exception as e:
+            logging.error(f'Failed to add items to crawl_emails: {e}')
+    
+    def add_crawl_email_database():
+        with Helper.crawl_emails_lock:
+            try:
+                mass_insert_query = (CrawlEmailModel
+                                        .insert_many(Helper.crawl_emails)
+                                        .on_conflict(action='IGNORE')
+                                        .as_rowcount()
+                                        .execute()
+                                    )
+                logging.info(f'Inserted {mass_insert_query} emails to crawl_email')
+            except Exception as e:
+                logging.error(f'Failed to add emails to crawl_email: {e}')
+    
     def __init__(self):
         spider.Helper.url_status = self.load_url_status()
         spider.Helper.request_status = self.load_request_status()

@@ -3,7 +3,7 @@ from models import BaseModel, CrawlHistoryModel
 
 class CrawlEmailModel(BaseModel):
     id = pw.AutoField(primary_key=True)
-    email = pw.TextField()
+    email = pw.TextField(unique=True)
     timestamp = pw.DateTimeField()
     crawl_history_id = pw.ForeignKeyField(CrawlHistoryModel, to_field='id')
 

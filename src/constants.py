@@ -1,12 +1,13 @@
 import re
 
 DATABASE_FILE = 'webcrawler.db'
-MAX_URLS_BEFORE_STORING = 10
-MINIMUM_URLS_IN_WORKER_QUEUE = 3
-MAXIMUM_URLS_IN_WORKER_QUEUE = 20
+
+MAX_URLS_IN_WORKER_QUEUE = 20
 
 MAX_URLS_IN_CRAWL_QUEUE = 0
 MAX_URLS_IN_CRAWL_HISTORY = 0
+
+MAX_EMAILS_IN_EMAIL_QUEUE = 0
 
 REGEX_URL = re.compile(
                 r'^(?:http|ftp)s?://' # http:// or https://
@@ -16,4 +17,4 @@ REGEX_URL = re.compile(
                 r'(?::\d+)?' # optional port
                 r'(?:/?|[/?]\S+)$', re.IGNORECASE)
 
-REGEX_EMAIL = re.compile(r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)', re.IGNORECASE)
+REGEX_EMAIL_FETCH = re.compile(r"[a-z0-9\.\-+_]+@[a-z0-9\.\-+_]+\.[a-z]+", re.IGNORECASE)
