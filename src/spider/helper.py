@@ -2,6 +2,7 @@ from models import UrlStatusModel, RequestStatusModel, DomainModel, CrawlEmailMo
 import threading
 import copy
 import logging
+from datetime import datetime
 
 import spider
 import constants
@@ -56,7 +57,6 @@ class Helper:
                     Helper.crawl_emails += value
                 else:
                     Helper.crawl_emails.append(value)
-            print(f'{len(Helper.crawl_emails)=}\n{value=}')
             if len(Helper.crawl_emails) > constants.MAX_EMAILS_IN_EMAIL_QUEUE:
                 Helper.add_crawl_email_database()
         except Exception as e:
@@ -64,9 +64,18 @@ class Helper:
     
     def add_crawl_email_database():
         with Helper.crawl_emails_lock:
+            email_objects = []
+            now = datetime.now()
+            for email in Helper.crawl_emails:
+                email_objects.append(
+                    {
+                    'email': email,
+                    'timestamp': now,
+                    'crawl_history_id': -1
+                    })
             try:
                 mass_insert_query = (CrawlEmailModel
-                                        .insert_many(Helper.crawl_emails)
+                                        .insert_many(email_objects)
                                         .on_conflict(action='IGNORE')
                                         .as_rowcount()
                                         .execute()

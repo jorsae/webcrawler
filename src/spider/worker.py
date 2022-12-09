@@ -46,7 +46,6 @@ class Worker:
                 spider.Overseer.add_crawl_queue(harvested_urls)
                 
                 emails = processor.url.get_emails(url_domain.url, req.text)
-                print(f'{emails=}')
                 spider.Helper.add_crawl_email(emails)
             except requests.Timeout as ex_timeout:
                 logging.warning(ex_timeout)
