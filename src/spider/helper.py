@@ -1,6 +1,5 @@
 from models import UrlStatusModel, RequestStatusModel, DomainModel, CrawlEmailModel
 import threading
-import copy
 import logging
 from datetime import datetime
 
@@ -70,8 +69,7 @@ class Helper:
                 email_objects.append(
                     {
                     'email': email,
-                    'timestamp': now,
-                    'crawl_history_id': -1
+                    'timestamp': now
                     })
             try:
                 mass_insert_query = (CrawlEmailModel

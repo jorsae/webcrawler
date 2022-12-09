@@ -3,9 +3,8 @@ import requests
 import time
 from urllib.parse import urlparse
 
-from models import CrawlQueueModel, DomainModel
+from models import CrawlQueueModel
 import spider
-from utility.UrlStatus import UrlStatus
 from utility.RequestStatus import RequestStatus
 from utility.UrlDomain import UrlDomain
 from utility.RobotParser import RobotParser

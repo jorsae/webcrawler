@@ -5,7 +5,6 @@ import logging
 import os
 
 import utility
-from utility.UrlStatus import UrlStatus
 
 def main():
     setup_logging()
