@@ -29,9 +29,11 @@ def main():
 def test():
     import requests
     import processor
-    r = requests.get('https://www.vg.no')
-    emails = processor.url.get_emails('as', r.text)
-    print(emails)
+    r = requests.get('https://realpython.com/beautiful-soup-web-scraper-python/')
+    # emails = processor.url.get_emails('as', r.text)
+    # print(emails)
+    visible_text = processor.data.get_visible_data(r.text)
+    print(visible_text)
 
 def test_overseer():
     overseer = Overseer(database)
