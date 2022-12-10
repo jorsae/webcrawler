@@ -35,17 +35,16 @@ class Worker:
                 if self.robot_parser.can_fetch(url_domain.url) is False:
                     logging.debug(f'[{self.id}] Not allowed to crawl: {url_domain.url}')
                     url_domain.request_status = RequestStatus.NOT_ALLOWED
-                    continue
+                else:
+                    # Parsing http request + content
+                    req = requests.get(url_domain.url)
+                    url_domain.http_status_code = req.status_code
+                    url_domain.request_status = RequestStatus.OK
+                    harvested_urls = processor.url.get_urls(url_domain.url, req.text)
+                    spider.Overseer.add_crawl_queue(harvested_urls)
                 
-                # Parsing http request + content
-                req = requests.get(url_domain.url)
-                url_domain.http_status_code = req.status_code
-                url_domain.request_status = RequestStatus.OK
-                harvested_urls = processor.url.get_urls(url_domain.url, req.text)
-                spider.Overseer.add_crawl_queue(harvested_urls)
-                
-                emails = processor.url.get_emails(url_domain.url, req.text)
-                spider.Helper.add_crawl_email(emails)
+                    emails = processor.url.get_emails(url_domain.url, req.text)
+                    spider.Helper.add_crawl_email(emails)
             except requests.Timeout as ex_timeout:
                 logging.warning(ex_timeout)
                 url_domain.request_status = RequestStatus.TIMEOUT
