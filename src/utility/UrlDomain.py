@@ -15,7 +15,10 @@ class UrlDomain:
         self.request_status = -1
     
     def get_domain_id(self):
-        return self.domain[0].id
+        try:
+            return self.domain[0].id
+        except:
+            return -1
 
     def __eq__(self, other):
         if self.domain[0].id == other.domain[0].id:
@@ -39,4 +42,4 @@ class UrlDomain:
             return -1
     
     def __str__(self):
-        return f'{self.domain[0].id}: {self.url}'
+        return f'{self.domain[0].id}: {self.url=}'

@@ -29,7 +29,8 @@ class Worker:
             self.queue.add(start_url)
         
         while len(self.queue) > 0:
-            url_domain = UrlDomain(self.queue.pop())
+            u = self.queue.pop()
+            url_domain = UrlDomain(u)
             self.ensure_robots_parsed(url_domain.url)
             try:
                 if self.robot_parser.can_fetch(url_domain.url) is False:
