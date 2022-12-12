@@ -45,7 +45,15 @@ class Overseer:
     
     def run(self):
         while True:
+            domains = []
             for spider in self.spiders:
+                # Check spiders domain id for duplicate
+                if spider.worker.domain is not None:
+                    spider_domain_id = spider.worker.domain.get_domain_id()
+                    if spider_domain_id in domains:
+                        spider.worker.domain = None
+                    domains.append(spider_domain_id)
+                
                 if spider.thread is not None:
                     if not spider.thread.is_alive():
                         spider.thread.handled = True
