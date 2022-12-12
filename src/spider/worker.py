@@ -78,6 +78,7 @@ class Worker:
                     time.sleep(request_rate)
         
         logging.info(f'Worker {self.id} finished crawl')
+        self.robot_parser = None
     
     def remove_from_queue(self, url):
         try:
@@ -86,14 +87,17 @@ class Worker:
             logging.error(e)
     
     def ensure_robots_parsed(self, url):
-        # If both passes, it's same url
-        if self.robot_parser is not None:
-            if self.robot_parser.same_robot(url):
-                return
-        
-        self.robot_parser = RobotParser(self.id, self.get_robots_url(url))
-        self.robot_parser.url_status = self.robot_parser.parse()
-        self.domain = UrlDomain(url)
+        try:
+            # If both passes, it's same url
+            if self.robot_parser is not None:
+                if self.robot_parser.same_robot(url):
+                    return
+            
+            self.robot_parser = RobotParser(self.id, self.get_robots_url(url))
+            self.robot_parser.url_status = self.robot_parser.parse()
+            self.domain = UrlDomain(url)
+        except Exception as e:
+            logging.critical(e)
     
     def get_robots_url(self, url):
         try:

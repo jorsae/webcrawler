@@ -49,3 +49,6 @@ class RobotParser:
         if self.robot_parser.can_fetch('*', url):
             return True
         return False
+    
+    def __str__(self):
+        return f'{self.robots_url}, {self.domain}, {self.url_status}'
