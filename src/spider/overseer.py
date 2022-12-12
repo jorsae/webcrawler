@@ -63,8 +63,9 @@ class Overseer:
             if len(Overseer.crawl_queue) >= constants.MAX_URLS_IN_CRAWL_QUEUE:
                 self.add_crawl_queue_database()
             
-            if len(Overseer.crawl_history) >= constants.MAX_URLS_IN_CRAWL_HISTORY:
-                self.add_crawl_history_database()
+            # TODO: See if I can permanently remove this.
+            # if len(Overseer.crawl_history) >= constants.MAX_URLS_IN_CRAWL_HISTORY:
+            #     self.add_crawl_history_database()
             
             time.sleep(1)
     

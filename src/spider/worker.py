@@ -1,9 +1,10 @@
 import logging
 import requests
 import time
+from datetime import datetime
 from urllib.parse import urlparse
 
-from models import CrawlQueueModel
+from models import CrawlQueueModel, CrawlHistoryModel, CrawlDataModel
 import spider
 from utility.RequestStatus import RequestStatus
 from utility.UrlDomain import UrlDomain
@@ -29,8 +30,7 @@ class Worker:
             self.queue.add(start_url)
         
         while len(self.queue) > 0:
-            u = self.queue.pop()
-            url_domain = UrlDomain(u)
+            url_domain = UrlDomain(self.queue.pop())
             self.ensure_robots_parsed(url_domain.url)
             try:
                 if self.robot_parser.can_fetch(url_domain.url) is False:
@@ -42,8 +42,10 @@ class Worker:
                     url_domain.http_status_code = req.status_code
                     url_domain.request_status = RequestStatus.OK
                     harvested_urls = processor.url.get_urls(url_domain.url, req.text)
+                    data = processor.data.get_visible_data(req.text)
                     spider.Overseer.add_crawl_queue(harvested_urls)
-                
+                    self.add_crawl_history(url_domain, data)
+                    
                     emails = processor.url.get_emails(url_domain.url, req.text)
                     spider.Helper.add_crawl_email(emails)
             except requests.Timeout as ex_timeout:
@@ -62,9 +64,6 @@ class Worker:
                 logging.warning(e)
                 url_domain.request_status = RequestStatus.ERROR
             
-            # Adding to crawl_history
-            spider.Overseer.add_crawl_history(url_domain)
-            
             # Deleting from queue
             self.remove_from_queue(url_domain.url)
             
@@ -81,6 +80,24 @@ class Worker:
         logging.info(f'Worker {self.id} finished crawl')
         self.robot_parser = None
     
+    def add_crawl_history(self, url_domain, data):
+        crawl_history, crawl_history_created = (CrawlHistoryModel.get_or_create(
+            url = url_domain.url,
+            timestamp = datetime.now(),
+            http_status_code = url_domain.http_status_code,
+            request_status = url_domain.request_status.name,
+            domain_id = url_domain.get_domain_id()
+        ))
+        if crawl_history_created is False:
+            logging.error(f'Failed to add crawl_history to CrawlHistoryModel: {url_domain=}')
+        
+        crawl_data, crawl_data_created = (CrawlDataModel.get_or_create(
+            data = data,
+            crawl_history_id = crawl_history[0].id
+        ))
+        if crawl_data_created is False:
+            logging.error(f'Failed to add crawl_data to CrawlDataModel: {data=}')
+
     def remove_from_queue(self, url):
         try:
             CrawlQueueModel.delete().where(CrawlQueueModel.url == url).execute()
