@@ -85,7 +85,7 @@ class Worker:
             url = url_domain.url,
             timestamp = datetime.now(),
             http_status_code = url_domain.http_status_code,
-            request_status = url_domain.request_status.name,
+            request_status = spider.Helper.request_status[url_domain.request_status.name],
             domain_id = url_domain.get_domain_id()
         ))
         if crawl_history_created is False:
@@ -93,7 +93,7 @@ class Worker:
         
         crawl_data, crawl_data_created = (CrawlDataModel.get_or_create(
             data = data,
-            crawl_history_id = crawl_history[0].id
+            crawl_history_id = crawl_history.id
         ))
         if crawl_data_created is False:
             logging.error(f'Failed to add crawl_data to CrawlDataModel: {data=}')
