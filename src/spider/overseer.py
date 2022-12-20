@@ -69,6 +69,7 @@ class Overseer:
             #     self.add_crawl_history_database()
             
             time.sleep(1)
+        print('Overseer stopped')
     
     def get_spider_urls(self, spider):
         queue_len = len(spider.worker.queue)

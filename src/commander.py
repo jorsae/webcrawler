@@ -14,17 +14,20 @@ class Commander(cmd.Cmd):
         self.overseer_thread.start()
         cmd.Cmd.__init__(self)
     
-    
     def do_exit(self, arg):
-        return True
-    
-    def postcmd(self, post, line):
+        print('Stopping spiders...')
         self.overseer.stop_all_spiders()
+        
+        print('Stopping Overseer..')
         self.overseer.run_overseer = False
         self.overseer_thread.join()
-        return cmd.Cmd.postcmd(self, post, line)
+        
+        print('Adding Crawl queue to database..')
+        self.overseer.add_crawl_queue_database()
+        return cmd.Cmd.postcmd(self, True, '')
 
     def do_spiders(self, arg):
+        print(f'Overseer - t:{self.overseer_thread.is_alive()} / r:{self.overseer.run_overseer}')
         for spider in self.overseer.spiders:
             print(f'{spider}')
     
