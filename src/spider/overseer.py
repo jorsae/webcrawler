@@ -118,17 +118,16 @@ class Overseer:
     def stop_all_spiders(self):
         # Faster to make all stop working before joining the threads
         for spider in self.spiders:
-            spider.worker.run = False
+            spider.stop_worker()
         
         for spider in self.spiders:
-            spider.thread.join()
+            spider.stop_thread()
             logging.info(f'Stopped spider: {spider.id}')
 
     def stop_spider(self, id):
         for spider in self.spiders:
             if spider.id == id:
-                spider.worker.run = False
-                spider.thread.join()
+                spider.stop_thread()
                 logging.info(f'Stopped spider: {spider.id}')
 
     def add_crawl_queue_database(self):

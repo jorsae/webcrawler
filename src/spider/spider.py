@@ -8,5 +8,13 @@ class Spider:
         self.thread = thread
         logging.debug('Created Spider')
     
+    def stop_worker(self):
+        self.worker.run = False
+
+    def stop_thread(self):
+        if self.worker.run:
+            self.worker.run = False
+        self.thread.join()
+
     def __str__(self):
         return f'[{self.id}] r: {self.thread.is_alive()}/{self.worker.run} - {self.worker.domain}'
