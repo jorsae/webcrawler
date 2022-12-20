@@ -14,7 +14,8 @@ class Commander(cmd.Cmd):
     
     def do_spiders(self, arg):
         for spider in self.overseer.spiders:
-            print(f'{spider.id}: {spider.worker.domain} {spider.thread.is_alive()}')
+            # print(f'{spider.id}: {spider.worker.domain} {spider.thread.is_alive()}')
+            print(f'{spider}')
     
     def do_create_spider(self, arg):
         self.overseer.create_spider()
@@ -39,24 +40,15 @@ class Commander(cmd.Cmd):
         else:
             self.overseer.start_spider(spider.id)
     
-    def do_restart_spider(self, arg):
+    def do_stop_spider(self, arg):
         args = self.parse_args(arg)
+        if len(args) <= 0:
+            print(f'stop_spider takes 1 arg: <id>')
         
-        spider = None
-        for s in self.overseer.spiders:
-            if s.id == args[0]:
-                spider = s
-        
-        print(spider.worker.robot_parser)
-        if spider is None:
-            print('no spider found')
-        
-        self.overseer.get_spider_urls(spider)
-        spider_queue = len(spider.worker.queue)
-        print(f'{spider_queue} @ {spider.thread.is_alive()}')
-        self.overseer.start_spider(spider.id)
-        print(f'{len(spider.worker.queue)} @ {spider.thread.is_alive()}')
-        print(spider.worker.robot_parser)
+        self.overseer.stop_spider(args[0])
+
+    def do_stop_all(self, arg):
+        self.overseer.stop_all_spiders()
 
     def do_list_queue(self, arg):
         print(f'{len(Overseer.crawl_queue)=} {len(Overseer.crawl_history)=}')

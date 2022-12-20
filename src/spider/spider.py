@@ -7,3 +7,6 @@ class Spider:
         self.id = id
         self.thread = thread
         logging.debug('Created Spider')
+    
+    def __str__(self):
+        return f'[{self.id}] r: {self.thread.is_alive()}/{self.worker.run} - {self.worker.domain}'

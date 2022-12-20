@@ -12,7 +12,7 @@ from utility.RobotParser import RobotParser
 import processor
 
 class Worker:
-    def __init__(self, database, id):
+    def __init__(self, database, id, run=True):
         self.database = database
         self.id = id
         self.queue = set()
@@ -21,15 +21,16 @@ class Worker:
         self.domain = None
         self.harvested_urls = set()
         self.crawl_history = []
+        self.run = run
         logging.debug('Created Worker')
     
-    def crawl(self, start_url = None):
+    def crawl(self, start_url=None):
         logging.info(f'Worker {self.id} starting crawl')
         
         if start_url is not None:
             self.queue.add(start_url)
         
-        while len(self.queue) > 0:
+        while len(self.queue) > 0 and self.run:
             url_domain = UrlDomain(self.queue.pop())
             self.ensure_robots_parsed(url_domain.url)
             try:
@@ -77,7 +78,7 @@ class Worker:
                 if request_rate is not None:
                     time.sleep(request_rate)
         
-        logging.info(f'Worker {self.id} finished crawl')
+        logging.info(f'Worker {self.id} finished crawl: {self.run}')
         self.robot_parser = None
     
     def add_crawl_history(self, url_domain, data):

@@ -85,7 +85,7 @@ class Overseer:
         if spider.worker.domain is None or len(spider.worker.queue) <= 0:
             domains = []
             for sp in self.spiders:
-                if sp.worker.domain is not None:
+                if sp.worker.domain is not None and sp.worker.run:
                     domains.append(sp.worker.domain.get_domain_id())
             
             new_url = (CrawlQueueModel
@@ -115,6 +115,22 @@ class Overseer:
                 spider.thread.start()
         logging.info(f'Starting spider {spider.id} with: {url}')
     
+    def stop_all_spiders(self):
+        # Faster to make all stop working before joining the threads
+        for spider in self.spiders:
+            spider.worker.run = False
+        
+        for spider in self.spiders:
+            spider.thread.join()
+            logging.info(f'Stopped spider: {spider.id}')
+
+    def stop_spider(self, id):
+        for spider in self.spiders:
+            if spider.id == id:
+                spider.worker.run = False
+                spider.thread.join()
+                logging.info(f'Stopped spider: {spider.id}')
+
     def add_crawl_queue_database(self):
         logging.debug(f'Adding items to crawl_queue: {len(Overseer.crawl_queue)}')
         with Overseer.crawl_queue_lock:
