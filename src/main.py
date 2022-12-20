@@ -1,4 +1,3 @@
-import peewee as pw
 from models import *
 from spider import Worker, Overseer, Helper
 import logging
@@ -16,7 +15,8 @@ def main():
     Helper() #initialize the url_status & request_status lists
 
     from commander import Commander
-    Commander().cmdloop()
+    overseer = Overseer(database)
+    Commander(overseer).cmdloop()
     
     # l = logging.getLogger()
     # print(l.level)

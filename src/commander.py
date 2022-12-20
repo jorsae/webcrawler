@@ -8,13 +8,14 @@ class Commander(cmd.Cmd):
     prompt = '(crawl-shell)$ '
     file = None
     
-    overseer = Overseer(database)
-    overseer_thread = threading.Thread(target=overseer.run)
-    overseer_thread.start()
+    def __init__(self, overseer):
+        self.overseer = overseer
+        self.overseer_thread = threading.Thread(target=self.overseer.run)
+        self.overseer_thread.start()
+        cmd.Cmd.__init__(self)
     
     def do_spiders(self, arg):
         for spider in self.overseer.spiders:
-            # print(f'{spider.id}: {spider.worker.domain} {spider.thread.is_alive()}')
             print(f'{spider}')
     
     def do_create_spider(self, arg):

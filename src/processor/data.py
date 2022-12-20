@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
 from bs4.element import Comment
-import logging
 
 def get_visible_data(content):
     soup = BeautifulSoup(content, "html.parser")
