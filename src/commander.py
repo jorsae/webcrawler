@@ -14,6 +14,16 @@ class Commander(cmd.Cmd):
         self.overseer_thread.start()
         cmd.Cmd.__init__(self)
     
+    
+    def do_exit(self, arg):
+        return True
+    
+    def postcmd(self, post, line):
+        self.overseer.stop_all_spiders()
+        self.overseer.run_overseer = False
+        self.overseer_thread.join()
+        return cmd.Cmd.postcmd(self, post, line)
+
     def do_spiders(self, arg):
         for spider in self.overseer.spiders:
             print(f'{spider}')

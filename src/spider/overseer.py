@@ -39,12 +39,13 @@ class Overseer:
     def __init__(self, database):
         self.database = database
         self.spiders = list()
+        self.run_overseer = True
 
         self.__spider_ids = 0
         logging.debug('Created Overseer')
     
     def run(self):
-        while True:
+        while self.run_overseer:
             domains = []
             for spider in self.spiders:
                 # Check spiders domain id for duplicate

@@ -1,20 +1,24 @@
+import signal
 from models import *
 from spider import Worker, Overseer, Helper
 import logging
 import os
+
+from commander import Commander
 
 import utility
 
 def main():
     setup_logging()
 
+    # setup_exit_handler()
     create_tables()
     fill_url_status_model()
     fill_request_status_model()
 
+    
     Helper() #initialize the url_status & request_status lists
 
-    from commander import Commander
     overseer = Overseer(database)
     Commander(overseer).cmdloop()
     
@@ -64,6 +68,13 @@ def create_tables():
     models = BaseModel.__subclasses__()
     database.create_tables(models)
     logging.debug(f'Created {len(models)} tables')
+
+def setup_exit_handler():
+    signal.signal(signal.SIGTERM, exit_handler)
+    signal.signal(signal.SIGINT, exit_handler)
+
+def exit_handler(a, e):
+    print('application ending')
 
 def setup_logging():
     logFolder = './logs'
