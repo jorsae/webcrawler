@@ -6,7 +6,7 @@ import os
 
 from commander import Commander
 
-import utility
+from utility import UrlStatus, RequestStatus
 
 def main():
     setup_logging()
@@ -55,14 +55,14 @@ def test_worker():
     worker.crawl('https://jorsae.github.io/CatGameCalculator/about.html')
 
 def fill_request_status_model():
-    for request_status in utility.RequestStatus.RequestStatus:
+    for request_status in RequestStatus:
         RequestStatusModel.get_or_create(request_status=request_status.name)
-    logging.debug(f'Created {len(utility.RequestStatus.RequestStatus)} RequestStatus objects in db')
+    logging.debug(f'Created {len(RequestStatus)} RequestStatus objects in db')
 
 def fill_url_status_model():
-    for url_status in utility.UrlStatus.UrlStatus:
+    for url_status in UrlStatus:
         UrlStatusModel.get_or_create(url_status=url_status.name)
-    logging.debug(f'Created {len(utility.UrlStatus.UrlStatus)} UrlStatus objects in db')
+    logging.debug(f'Created {len(UrlStatus)} UrlStatus objects in db')
 
 def create_tables():
     models = BaseModel.__subclasses__()

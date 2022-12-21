@@ -6,9 +6,7 @@ from urllib.parse import urlparse
 
 from models import CrawlQueueModel, CrawlHistoryModel, CrawlDataModel
 import spider
-from utility.RequestStatus import RequestStatus
-from utility.UrlDomain import UrlDomain
-from utility.RobotParser import RobotParser
+from utility import RequestStatus, UrlDomain, RobotParser
 import processor
 
 class Worker:
