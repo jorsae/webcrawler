@@ -3,7 +3,7 @@ import urllib.robotparser as rp
 from urllib.parse import urlparse
 import logging
 
-from utility.UrlStatus import UrlStatus
+from utility import UrlStatus
 
 class RobotParser:
     def __init__(self, id, robots_url):

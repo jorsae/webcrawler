@@ -3,7 +3,7 @@ import logging
 import re
 from urllib.parse import urljoin
 
-from utility.UrlDomain import UrlDomain
+from utility import UrlDomain
 import constants
 
 def get_urls(url, content):
