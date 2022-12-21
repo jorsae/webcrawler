@@ -7,19 +7,21 @@ import os
 from commander import Commander
 
 from utility import UrlStatus, RequestStatus
+import arguments
 
 def main():
     setup_logging()
-
     # setup_exit_handler()
+    
+    args = arguments.parse_arguments()
+    overseer = Overseer(database)
+    arguments.run_arguments(args, overseer)
+    
     create_tables()
     fill_url_status_model()
     fill_request_status_model()
-
-    
     Helper() #initialize the url_status & request_status lists
-
-    overseer = Overseer(database)
+    
     Commander(overseer).cmdloop()
     
     # l = logging.getLogger()
