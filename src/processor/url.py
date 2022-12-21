@@ -18,4 +18,5 @@ def get_urls(url, content):
     return urls
 
 def get_emails(url, content):
+    # TODO: Remove duplicate
     return re.findall(constants.REGEX_EMAIL_FETCH, content)
