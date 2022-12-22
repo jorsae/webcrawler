@@ -9,6 +9,7 @@ import constants
 class Helper:
     crawl_data_lock = threading.Lock()
     crawl_history_lock = threading.Lock()
+    crawl_queue_lock = threading.Lock()
 
     url_status = None
     request_status = None

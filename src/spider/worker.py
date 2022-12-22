@@ -101,7 +101,8 @@ class Worker:
 
     def remove_from_queue(self, url):
         try:
-            CrawlQueueModel.delete().where(CrawlQueueModel.url == url).execute()
+            with spider.Helper.crawl_queue_lock:
+                CrawlQueueModel.delete().where(CrawlQueueModel.url == url).execute()
         except Exception as e:
             logging.error(e)
     
