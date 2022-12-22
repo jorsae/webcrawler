@@ -38,6 +38,9 @@ class Helper:
     def update_domain_url_status(robot_parser, domain):
         try:
             with spider.Helper.update_domain_url_status_lock:
+                if domain is None:
+                    logging.error(f'domain is None: {robot_parser} {domain}')
+                    return
                 # TODO: if url_status is SSL_VERIFICATION_FAILED or ERROR. Do something?
                 url_status = spider.Helper.url_status[robot_parser.url_status.name]
                 (DomainModel
