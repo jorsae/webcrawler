@@ -7,10 +7,10 @@ class UrlDomain:
         self.url = url
         try:
             domain = urlparse(url).netloc
+            self.domain = DomainModel.get_or_create(domain=domain)
         except Exception as e:
             logging.error(e)
             domain = url
-        self.domain = DomainModel.get_or_create(domain=domain)
         self.http_status_code = -1
         self.request_status = -1
     
