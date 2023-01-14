@@ -30,6 +30,9 @@ class Worker:
         
         while len(self.queue) > 0 and self.run:
             url_domain = UrlDomain(self.queue.pop())
+            if url_domain == None:
+                logging.error(f'[{self.id}] url_domain is None')
+                continue
             self.ensure_robots_parsed(url_domain.url)
             try:
                 if self.robot_parser.can_fetch(url_domain.url) is False:
