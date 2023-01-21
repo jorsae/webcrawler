@@ -67,24 +67,30 @@ class Helper:
     
     def add_crawl_email_database():
         with Helper.crawl_emails_lock:
-            email_objects = []
-            now = datetime.now()
-            for email in Helper.crawl_emails:
-                email_objects.append(
-                    {
-                    'email': email,
-                    'timestamp': now
-                    })
-            try:
-                mass_insert_query = (CrawlEmailModel
-                                        .insert_many(email_objects)
-                                        .on_conflict(action='IGNORE')
-                                        .as_rowcount()
-                                        .execute()
-                                    )
-                logging.info(f'Inserted {mass_insert_query} emails to crawl_email')
-            except Exception as e:
-                logging.error(f'Failed to add emails to crawl_email: {e}')
+            while len(Helper.crawl_emails) > 0:
+                emails = 0
+                email_objects = []
+                now = datetime.now()
+                for email in Helper.crawl_emails:
+                    Helper.crawl_emails.remove(email)
+                    if emails > constants.MAX_EMAILS_INSERTED_AT_ONCE:
+                        break
+                    email_objects.append(
+                        {
+                        'email': email,
+                        'timestamp': now
+                        })
+                    emails += 1
+                try:
+                    mass_insert_query = (CrawlEmailModel
+                                            .insert_many(email_objects)
+                                            .on_conflict(action='IGNORE')
+                                            .as_rowcount()
+                                            .execute()
+                                        )
+                    logging.info(f'Inserted {mass_insert_query} emails to crawl_email')
+                except Exception as e:
+                    logging.error(f'Failed to add emails to crawl_email: {e}')
     
     def __init__(self):
         spider.Helper.url_status = self.load_url_status()

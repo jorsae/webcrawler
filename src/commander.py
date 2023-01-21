@@ -1,5 +1,5 @@
 from models import *
-from spider import Overseer
+from spider import Overseer, Helper
 import threading
 import cmd
 
@@ -65,7 +65,7 @@ class Commander(cmd.Cmd):
         self.overseer.stop_all_spiders()
 
     def do_list_queue(self, arg):
-        print(f'{len(Overseer.crawl_queue)=} {len(Overseer.crawl_history)=}')
+        print(f'{len(Overseer.crawl_queue)=} {len(Overseer.crawl_history)=} {len(Helper.crawl_emails)=}')
     
     def parse_args(self, args):
         args = args.split(' ')
