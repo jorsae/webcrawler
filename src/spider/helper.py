@@ -88,7 +88,7 @@ class Helper:
                                             .as_rowcount()
                                             .execute()
                                         )
-                    logging.info(f'Inserted {mass_insert_query} emails to crawl_email')
+                    logging.info(f'Inserted {mass_insert_query} emails to crawl_email. {len(Helper.crawl_emails)=}')
                 except Exception as e:
                     logging.error(f'Failed to add emails to crawl_email: {e}')
     
