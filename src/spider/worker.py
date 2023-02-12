@@ -34,6 +34,7 @@ class Worker:
                 logging.error(f'[{self.id}] url_domain is None')
                 continue
             self.ensure_robots_parsed(url_domain.url)
+            logging.debug(f'{url_domain=}')
             try:
                 if self.robot_parser.can_fetch(url_domain.url) is False:
                     logging.debug(f'[{self.id}] Not allowed to crawl: {url_domain.url}')
@@ -70,6 +71,7 @@ class Worker:
             self.remove_from_queue(url_domain.url)
             
             # Update the domain url_status
+            logging.debug(f'{url_domain=}')
             if self.robot_parser.url_status_updated is False:
                 self.robot_parser.url_status_updated = spider.Helper.update_domain_url_status(self.robot_parser, self.domain)
 
