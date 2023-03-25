@@ -10,7 +10,7 @@ class UrlDomain:
             self.domain = DomainModel.get_or_create(domain=domain)
         except Exception as e:
             logging.error(e)
-            domain = url
+            self.domain = url
         self.http_status_code = -1
         self.request_status = -1
     
