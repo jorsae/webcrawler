@@ -76,7 +76,7 @@ class Commander(cmd.Cmd):
         print(f'Crawl History: {CrawlHistoryModel.select().count()}')
         print(f'Crawl Data: {CrawlDataModel.select().count()}')
         print(f'Emails: {CrawlEmailModel.select().count()}')
-        print(f'Requests Statuses: {CrawlEmailModel.select().count()} // Url Statuses: {UrlStatusModel.select().count()}')
+        print(f'Requests Statuses: {RequestStatusModel.select().count()} // Url Statuses: {UrlStatusModel.select().count()}')
 
     def parse_args(self, args):
         args = args.split(' ')
