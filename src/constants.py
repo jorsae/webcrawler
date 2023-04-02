@@ -2,6 +2,9 @@ import re
 
 DATABASE_FILE = 'webcrawler.db'
 
+
+MAX_TIMEOUT = 5
+
 MAX_URLS_IN_WORKER_QUEUE = 20
 
 MAX_URLS_IN_CRAWL_QUEUE = 250
