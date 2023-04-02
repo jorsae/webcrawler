@@ -71,12 +71,12 @@ class Commander(cmd.Cmd):
     def do_database_stats(self, arg):
         print('===== DATABASE STATS =====')
         url_status_id = UrlStatusModel.get(UrlStatusModel.url_status == utility.UrlStatus.OK.name)
-        print(f'Domains: {DomainModel.select().count()} ({DomainModel.select().where(DomainModel.url_status_id == url_status_id).count()})')
-        print(f'Crawl Queue: {CrawlQueueModel.select().count()}')
-        print(f'Crawl History: {CrawlHistoryModel.select().count()}')
-        print(f'Crawl Data: {CrawlDataModel.select().count()}')
-        print(f'Emails: {CrawlEmailModel.select().count()}')
-        print(f'Requests Statuses: {RequestStatusModel.select().count()} // Url Statuses: {UrlStatusModel.select().count()}')
+        print(f'Domains: {DomainModel.select().count():,} ({DomainModel.select().where(DomainModel.url_status_id == url_status_id).count():,})')
+        print(f'Crawl Queue: {CrawlQueueModel.select().count():,}')
+        print(f'Crawl History: {CrawlHistoryModel.select().count():,}')
+        print(f'Crawl Data: {CrawlDataModel.select().count():,}')
+        print(f'Emails: {CrawlEmailModel.select().count():,}')
+        print(f'Requests Statuses: {RequestStatusModel.select().count():,} // Url Statuses: {UrlStatusModel.select().count():,}')
 
     def parse_args(self, args):
         args = args.split(' ')
