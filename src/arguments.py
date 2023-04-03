@@ -1,5 +1,4 @@
 import argparse
-import peewee as pw
 
 from models import database
 import constants

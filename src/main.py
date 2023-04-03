@@ -23,38 +23,6 @@ def main():
     Helper() #initialize the url_status & request_status lists
     
     Commander(overseer).cmdloop()
-    
-    # l = logging.getLogger()
-    # print(l.level)
-    # l.level = logging.CRITICAL
-    # print(l.level)
-    # test_overseer()
-    # test_worker()
-    # test()
-
-def test():
-    import requests
-    import processor
-    r = requests.get('https://realpython.com/beautiful-soup-web-scraper-python/')
-    # emails = processor.url.get_emails('as', r.text)
-    # print(emails)
-    visible_text = processor.data.get_visible_data(r.text)
-    print(visible_text)
-
-def test_overseer():
-    overseer = Overseer(database)
-
-    spider = overseer.create_spider()
-    overseer.start_spider(spider.id, 'https://vg.no')
-    # overseer.start_spider(spider.id, 'https://jorsae.github.io/CatGameCalculator/')
-    # overseer.start_spider(spider.id)
-
-    overseer.run()
-
-def test_worker():
-    worker = Worker(database)
-    # worker.crawl('https://vg.no')
-    worker.crawl('https://jorsae.github.io/CatGameCalculator/about.html')
 
 def fill_request_status_model():
     for request_status in RequestStatus:

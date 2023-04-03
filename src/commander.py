@@ -3,6 +3,7 @@ from spider import Overseer, Helper
 import utility.UrlStatus
 import threading
 import cmd
+import constants
 
 class Commander(cmd.Cmd):
     intro = 'Welcome to crawl-shell.   Type help or ? to list commands.\n'
@@ -81,7 +82,17 @@ class Commander(cmd.Cmd):
         with Helper.crawl_emails_lock:
             print(f'Emails: {CrawlEmailModel.select().count():,}')
         print(f'Requests Statuses: {RequestStatusModel.select().count():,} // Url Statuses: {UrlStatusModel.select().count():,}')
-
+    
+    def do_internal_stats(self, arg):
+        print('===== INTERNAL STATS =====')
+        print(f'Crawl Queue: {len(Overseer.crawl_queue)} / {constants.MAX_URLS_IN_CRAWL_QUEUE}')
+        print(f'Crawl History: {len(Overseer.crawl_history)} / {constants.MAX_URLS_IN_CRAWL_HISTORY}')
+        print(f'Crawl Emails: {len(Helper.crawl_emails)} / {constants.MAX_EMAILS_IN_EMAIL_QUEUE}\tchunks:({constants.MAX_EMAILS_INSERTED_AT_ONCE})')
+    
+    def do_stats(self, arg):
+        self.do_internal_stats(arg)
+        self.do_database_stats(arg)
+    
     def parse_args(self, args):
         args = args.split(' ')
 
