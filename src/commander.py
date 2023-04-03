@@ -81,7 +81,7 @@ class Commander(cmd.Cmd):
             print(f'Crawl Data: {CrawlDataModel.select().count():,}')
         with Helper.crawl_emails_lock:
             print(f'Emails: {CrawlEmailModel.select().count():,}')
-        print(f'Requests Statuses: {RequestStatusModel.select().count():,} // Url Statuses: {UrlStatusModel.select().count():,}')
+        # print(f'Requests Statuses: {RequestStatusModel.select().count():,} // Url Statuses: {UrlStatusModel.select().count():,}')
     
     def do_internal_stats(self, arg):
         print('===== INTERNAL STATS =====')
