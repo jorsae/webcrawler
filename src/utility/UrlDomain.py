@@ -17,7 +17,8 @@ class UrlDomain:
     def get_domain_id(self):
         try:
             return self.domain[0].id
-        except:
+        except Exception as e:
+            logging.warning(f'{self} {e}')
             return -1
 
     def __eq__(self, other):
@@ -34,7 +35,7 @@ class UrlDomain:
             if self.domain[0].id < other.domain[0].id:
                 return True
         except Exception as e:
-            logging.warning(self)
+            logging.warning(f'{self} {e}')
             return True
     
     def __cmp__(self, other):
