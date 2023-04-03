@@ -71,8 +71,10 @@ class Commander(cmd.Cmd):
     
     def do_database_stats(self, arg):
         print('===== DATABASE STATS =====')
-        url_status_id = UrlStatusModel.get(UrlStatusModel.url_status == utility.UrlStatus.OK.name)
-        print(f'Domains: {DomainModel.select().count():,} ({DomainModel.select().where(DomainModel.url_status_id == url_status_id).count():,})')
+        # Can cause locked database.
+        # url_status_id = UrlStatusModel.get(UrlStatusModel.url_status == utility.UrlStatus.OK.name)
+        # print(f'Domains: {DomainModel.select().count():,} ({DomainModel.select().where(DomainModel.url_status_id == url_status_id).count():,})')
+        # print(f'Domains: {DomainModel.select().count():,} ({DomainModel.select().where(DomainModel.url_status_id == url_status_id).count():,})')
         with self.overseer.crawl_queue_lock:
             print(f'Crawl Queue: {CrawlQueueModel.select().count():,}')
         with self.overseer.crawl_history_lock:
