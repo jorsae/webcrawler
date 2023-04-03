@@ -35,7 +35,7 @@ class Worker:
                 logging.error(f'[{self.id}] url_domain is None')
                 continue
             self.ensure_robots_parsed(url_domain.url)
-            logging.debug(f'{url_domain=}')
+            logging.debug(f'{str(url_domain)=}')
             try:
                 if self.robot_parser.can_fetch(url_domain.url) is False:
                     logging.debug(f'[{self.id}] Not allowed to crawl: {url_domain.url}')

@@ -72,10 +72,14 @@ class Commander(cmd.Cmd):
         print('===== DATABASE STATS =====')
         url_status_id = UrlStatusModel.get(UrlStatusModel.url_status == utility.UrlStatus.OK.name)
         print(f'Domains: {DomainModel.select().count():,} ({DomainModel.select().where(DomainModel.url_status_id == url_status_id).count():,})')
-        print(f'Crawl Queue: {CrawlQueueModel.select().count():,}')
-        print(f'Crawl History: {CrawlHistoryModel.select().count():,}')
-        print(f'Crawl Data: {CrawlDataModel.select().count():,}')
-        print(f'Emails: {CrawlEmailModel.select().count():,}')
+        with self.overseer.crawl_queue_lock:
+            print(f'Crawl Queue: {CrawlQueueModel.select().count():,}')
+        with self.overseer.crawl_history_lock:
+            print(f'Crawl History: {CrawlHistoryModel.select().count():,}')
+        with Helper.crawl_data_lock:
+            print(f'Crawl Data: {CrawlDataModel.select().count():,}')
+        with Helper.crawl_emails_lock:
+            print(f'Emails: {CrawlEmailModel.select().count():,}')
         print(f'Requests Statuses: {RequestStatusModel.select().count():,} // Url Statuses: {UrlStatusModel.select().count():,}')
 
     def parse_args(self, args):
