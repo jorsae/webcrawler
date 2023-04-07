@@ -17,4 +17,4 @@ class Spider:
         self.thread.join()
 
     def __str__(self):
-        return f'[{self.id}] r: {self.thread.is_alive()}/{self.worker.run} - {self.worker.domain}'
+        return f'[{self.id}] thread:{self.thread.is_alive()}/run:{self.worker.run} - {self.worker.domain}'

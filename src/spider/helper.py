@@ -7,9 +7,6 @@ import spider
 import constants
 
 class Helper:
-    crawl_data_lock = threading.Lock()
-    crawl_history_lock = threading.Lock()
-    crawl_queue_lock = threading.Lock()
 
     url_status = None
     request_status = None
@@ -33,11 +30,10 @@ class Helper:
         logging.debug(f'Loaded {len(request_status)} request_statuses')
         return request_status_dict
     
-    update_domain_url_status_lock = threading.Lock()
     @staticmethod
     def update_domain_url_status(robot_parser, domain):
         try:
-            with spider.Helper.update_domain_url_status_lock:
+            with constants.UPDATE_DOMAIN_URL_STATUS_LOCK:
                 # TODO: if url_status is SSL_VERIFICATION_FAILED or ERROR. Do something?
                 url_status = spider.Helper.url_status[robot_parser.url_status.name]
                 (DomainModel
@@ -51,11 +47,10 @@ class Helper:
             return False
     
     crawl_emails = list()
-    crawl_emails_lock = threading.Lock()
     @staticmethod
     def add_crawl_email(value):
         try:
-            with Helper.crawl_emails_lock:
+            with constants.CRAWL_EMAILS_LOCK:
                 if type(value) == list:
                     Helper.crawl_emails += value
                 else:
@@ -66,7 +61,7 @@ class Helper:
             logging.error(f'Failed to add items to crawl_emails: {e}')
     
     def add_crawl_email_database():
-        with Helper.crawl_emails_lock:
+        with constants.CRAWL_EMAILS_LOCK:
             while len(Helper.crawl_emails) > 0:
                 emails = 0
                 email_objects = []

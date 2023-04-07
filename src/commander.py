@@ -75,13 +75,13 @@ class Commander(cmd.Cmd):
         # url_status_id = UrlStatusModel.get(UrlStatusModel.url_status == utility.UrlStatus.OK.name)
         # print(f'Domains: {DomainModel.select().count():,} ({DomainModel.select().where(DomainModel.url_status_id == url_status_id).count():,})')
         # print(f'Domains: {DomainModel.select().count():,} ({DomainModel.select().where(DomainModel.url_status_id == url_status_id).count():,})')
-        with self.overseer.crawl_queue_lock:
+        with constants.CRAWL_QUEUE_LOCK:
             print(f'Crawl Queue: {CrawlQueueModel.select().count():,}')
-        with self.overseer.crawl_history_lock:
+        with constants.CRAWL_HISTORY_LOCK:
             print(f'Crawl History: {CrawlHistoryModel.select().count():,}')
-        with Helper.crawl_data_lock:
+        with constants.CRAWL_DATA_LOCK:
             print(f'Crawl Data: {CrawlDataModel.select().count():,}')
-        with Helper.crawl_emails_lock:
+        with constants.CRAWL_EMAILS_LOCK:
             print(f'Emails: {CrawlEmailModel.select().count():,}')
         # print(f'Requests Statuses: {RequestStatusModel.select().count():,} // Url Statuses: {UrlStatusModel.select().count():,}')
     

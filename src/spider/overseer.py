@@ -11,11 +11,10 @@ import spider
 
 class Overseer:
     crawl_queue = list()
-    crawl_queue_lock = threading.Lock()
     @staticmethod
     def add_crawl_queue(value):
         try:
-            with Overseer.crawl_queue_lock:
+            with constants.CRAWL_QUEUE_LOCK:
                 if type(value) == list:
                     Overseer.crawl_queue += value
                 else:
@@ -24,11 +23,10 @@ class Overseer:
             logging.critical('Failed to add items to crawl_queue')
 
     crawl_history = list()
-    crawl_history_lock = threading.Lock()
     @staticmethod
     def add_crawl_history(value):
         try:
-            with Overseer.crawl_history_lock:
+            with constants.CRAWL_HISTORY_LOCK:
                 if type(value) == list:
                     Overseer.crawl_history += value
                 else:
@@ -130,7 +128,7 @@ class Overseer:
 
     def add_crawl_queue_database(self):
         logging.debug(f'Adding items to crawl_queue: {len(Overseer.crawl_queue)}')
-        with Overseer.crawl_queue_lock:
+        with constants.CRAWL_QUEUE_LOCK:
             logging.debug(f'add_crawl_queue_database locked for deepcopy')
             crawl_queue = copy.deepcopy(Overseer.crawl_queue)
             Overseer.crawl_queue.clear()
@@ -178,7 +176,7 @@ class Overseer:
 
     def add_crawl_history_database(self):
         logging.info(f'Adding items to crawl_history: {len(Overseer.crawl_history)}')
-        with Overseer.crawl_history_lock:
+        with constants.CRAWL_HISTORY_LOCK:
             logging.debug(f'add_crawl_history_database locked for deepcopy')
             crawl_history = copy.deepcopy(Overseer.crawl_history)
             Overseer.crawl_history.clear()

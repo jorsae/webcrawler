@@ -8,7 +8,7 @@ from models import CrawlQueueModel, CrawlHistoryModel, CrawlDataModel
 import spider
 from utility import RequestStatus, UrlDomain, RobotParser
 import processor
-from constants import MAX_TIMEOUT
+import constants
 
 class Worker:
     def __init__(self, database, id, run=True):
@@ -42,7 +42,7 @@ class Worker:
                     url_domain.request_status = RequestStatus.NOT_ALLOWED
                 else:
                     # Parsing http request + content
-                    req = requests.get(url_domain.url, timeout=MAX_TIMEOUT)
+                    req = requests.get(url_domain.url, timeout=constants.MAX_TIMEOUT)
                     url_domain.http_status_code = req.status_code
                     url_domain.request_status = RequestStatus.OK
                     harvested_urls = processor.url.get_urls(url_domain.url, req.text)
@@ -86,7 +86,7 @@ class Worker:
         self.robot_parser = None
     
     def add_crawl_history(self, url_domain, data):
-        with spider.Helper.crawl_data_lock:
+        with constants.CRAWL_HISTORY_LOCK:
             crawl_history, crawl_history_created = (CrawlHistoryModel.get_or_create(
                 url = url_domain.url,
                 timestamp = datetime.now(),
@@ -97,7 +97,7 @@ class Worker:
         if crawl_history_created is False:
             logging.error(f'Failed to add crawl_history to CrawlHistoryModel: {url_domain=}')
         
-        with spider.Helper.crawl_history_lock:
+        with constants.CRAWL_DATA_LOCK:
             crawl_data, crawl_data_created = (CrawlDataModel.get_or_create(
                 data = data,
                 crawl_history_id = crawl_history.id
@@ -107,7 +107,7 @@ class Worker:
 
     def remove_from_queue(self, url):
         try:
-            with spider.Helper.crawl_queue_lock:
+            with constants.CRAWL_QUEUE_LOCK:
                 CrawlQueueModel.delete().where(CrawlQueueModel.url == url).execute()
         except Exception as e:
             logging.error(e)
