@@ -2,12 +2,15 @@ from models import DomainModel
 from urllib.parse import urlparse
 import logging
 
+import constants
+
 class UrlDomain:
     def __init__(self, url):
         self.url = url
         try:
             domain = urlparse(url).netloc
-            self.domain = DomainModel.get_or_create(domain=domain)
+            with constants.DOMAIN_LOCK:
+                self.domain = DomainModel.get_or_create(domain=domain)
         except Exception as e:
             logging.error(e)
             self.domain = url
