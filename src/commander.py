@@ -17,14 +17,14 @@ class Commander(cmd.Cmd):
         cmd.Cmd.__init__(self)
     
     def do_exit(self, arg):
-        print('Stopping spiders...')
+        print('Stopping Spiders...')
         self.overseer.stop_all_spiders()
         
-        print('Stopping Overseer..')
+        print('Stopping Overseer...')
         self.overseer.run_overseer = False
         self.overseer_thread.join()
         
-        print('Adding Crawl queue to database..')
+        print('Adding Crawl queue to database...')
         self.overseer.add_crawl_queue_database()
         return cmd.Cmd.postcmd(self, True, '')
 
