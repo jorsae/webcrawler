@@ -12,8 +12,8 @@ class UrlDomain:
             with constants.DOMAIN_LOCK:
                 self.domain = DomainModel.get_or_create(domain=domain)
         except Exception as e:
-            logging.error(f'{url=} {e}')
-            self.domain = url
+            self.domain = DomainModel.get_or_create(domain=url)
+            logging.error(f'{url=} {self.domain=} {e}')
         self.http_status_code = -1
         self.request_status = -1
     
