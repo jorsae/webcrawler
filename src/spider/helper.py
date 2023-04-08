@@ -13,7 +13,8 @@ class Helper:
     @staticmethod
     def load_url_status():
         url_status_dict = {}
-        url_status = list(UrlStatusModel.select())
+        with constants.URL_STATUS_MODEL_LOCK:
+            url_status = list(UrlStatusModel.select())
         for us in url_status:
             url_status_dict[us.url_status] = us.id
         logging.debug(f'loaded {len(url_status)} url_statuses')
@@ -22,7 +23,8 @@ class Helper:
     @staticmethod
     def load_request_status():
         request_status_dict = {}
-        request_status = list(RequestStatusModel.select())
+        with constants.REQUEST_STATUS_MODEL_LOCK:
+            request_status = list(RequestStatusModel.select())
         for rs in request_status:
             request_status_dict[rs.request_status] = rs.id
         

@@ -79,7 +79,8 @@ class Commander(cmd.Cmd):
     def do_database_stats(self, arg):
         print('===== DATABASE STATS =====')
         # Can cause locked database.
-        url_status_id = UrlStatusModel.get(UrlStatusModel.url_status == utility.UrlStatus.OK.name)
+        with constants.URL_STATUS_MODEL_LOCK:
+            url_status_id = UrlStatusModel.get(UrlStatusModel.url_status == utility.UrlStatus.OK.name)
         with constants.DOMAIN_MODEL_LOCK:
             print(f'Domains: {DomainModel.select().count():,} ({DomainModel.select().where(DomainModel.url_status_id == url_status_id).count():,})')
         with constants.CRAWL_QUEUE_LOCK:
@@ -90,7 +91,12 @@ class Commander(cmd.Cmd):
             print(f'Crawl Data: {CrawlDataModel.select().count():,}')
         with constants.CRAWL_EMAILS_LOCK:
             print(f'Emails: {CrawlEmailModel.select().count():,}')
-        print(f'Requests Statuses: {RequestStatusModel.select().count():,} // Url Statuses: {UrlStatusModel.select().count():,}')
+        
+        with constants.REQUEST_STATUS_MODEL_LOCK:
+            request_statuses = f'Requests Statuses: {RequestStatusModel.select().count():,}'
+        with constants.URL_STATUS_MODEL_LOCK:
+            url_statuses = f'Url Statuses: {UrlStatusModel.select().count():,}'
+        print(f'{request_statuses} // {url_statuses}')
     
     def do_internal_stats(self, arg):
         print('===== INTERNAL STATS =====')

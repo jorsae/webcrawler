@@ -8,6 +8,7 @@ from commander import Commander
 
 from utility import UrlStatus, RequestStatus
 import arguments
+import constants
 
 def main():
     setup_logging()
@@ -25,13 +26,15 @@ def main():
     Commander(overseer).cmdloop()
 
 def fill_request_status_model():
-    for request_status in RequestStatus:
-        RequestStatusModel.get_or_create(request_status=request_status.name)
+    with constants.REQUEST_STATUS_MODEL_LOCK:
+        for request_status in RequestStatus:
+            RequestStatusModel.get_or_create(request_status=request_status.name)
     logging.debug(f'Created {len(RequestStatus)} RequestStatus objects in db')
 
 def fill_url_status_model():
-    for url_status in UrlStatus:
-        UrlStatusModel.get_or_create(url_status=url_status.name)
+    with constants.URL_STATUS_MODEL_LOCK:
+        for url_status in UrlStatus:
+            UrlStatusModel.get_or_create(url_status=url_status.name)
     logging.debug(f'Created {len(UrlStatus)} UrlStatus objects in db')
 
 def create_tables():
