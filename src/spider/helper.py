@@ -1,5 +1,4 @@
 from models import UrlStatusModel, RequestStatusModel, DomainModel, CrawlEmailModel
-import threading
 import logging
 from datetime import datetime
 
@@ -33,7 +32,7 @@ class Helper:
     @staticmethod
     def update_domain_url_status(robot_parser, domain):
         try:
-            with constants.DOMAIN_LOCK:
+            with constants.DOMAIN_MODEL_LOCK:
                 # TODO: if url_status is SSL_VERIFICATION_FAILED or ERROR. Do something?
                 url_status = spider.Helper.url_status[robot_parser.url_status.name]
                 (DomainModel

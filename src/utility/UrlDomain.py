@@ -9,10 +9,10 @@ class UrlDomain:
         self.url = url
         try:
             domain = urlparse(url).netloc
-            with constants.DOMAIN_LOCK:
+            with constants.DOMAIN_MODEL_LOCK:
                 self.domain = DomainModel.get_or_create(domain=domain)
         except Exception as e:
-            with constants.DOMAIN_LOCK:
+            with constants.DOMAIN_MODEL_LOCK:
                 self.domain = DomainModel.get_or_create(domain=url)
             logging.error(f'{url=} {self.domain=} {e}')
         self.http_status_code = -1

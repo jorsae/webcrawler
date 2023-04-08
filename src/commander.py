@@ -72,9 +72,9 @@ class Commander(cmd.Cmd):
     def do_database_stats(self, arg):
         print('===== DATABASE STATS =====')
         # Can cause locked database.
-        # url_status_id = UrlStatusModel.get(UrlStatusModel.url_status == utility.UrlStatus.OK.name)
-        # print(f'Domains: {DomainModel.select().count():,} ({DomainModel.select().where(DomainModel.url_status_id == url_status_id).count():,})')
-        # print(f'Domains: {DomainModel.select().count():,} ({DomainModel.select().where(DomainModel.url_status_id == url_status_id).count():,})')
+        url_status_id = UrlStatusModel.get(UrlStatusModel.url_status == utility.UrlStatus.OK.name)
+        with constants.DOMAIN_MODEL_LOCK:
+            print(f'Domains: {DomainModel.select().count():,} ({DomainModel.select().where(DomainModel.url_status_id == url_status_id).count():,})')
         with constants.CRAWL_QUEUE_LOCK:
             print(f'Crawl Queue: {CrawlQueueModel.select().count():,}')
         with constants.CRAWL_HISTORY_LOCK:
@@ -83,7 +83,7 @@ class Commander(cmd.Cmd):
             print(f'Crawl Data: {CrawlDataModel.select().count():,}')
         with constants.CRAWL_EMAILS_LOCK:
             print(f'Emails: {CrawlEmailModel.select().count():,}')
-        # print(f'Requests Statuses: {RequestStatusModel.select().count():,} // Url Statuses: {UrlStatusModel.select().count():,}')
+        print(f'Requests Statuses: {RequestStatusModel.select().count():,} // Url Statuses: {UrlStatusModel.select().count():,}')
     
     def do_internal_stats(self, arg):
         print('===== INTERNAL STATS =====')
@@ -94,6 +94,15 @@ class Commander(cmd.Cmd):
     def do_stats(self, arg):
         self.do_internal_stats(arg)
         self.do_database_stats(arg)
+    
+    def do_settings(self, arg):
+        print('===== SETTINGS =====')
+        print(f'Database: {constants.DATABASE_FILE}')
+        print(f'Request Timeout: {constants.MAX_TIMEOUT}')
+        print(f'Max Urls in worker queue: {constants.MAX_URLS_IN_WORKER_QUEUE}')
+        print(f'Max Crawl Queue: {constants.MAX_URLS_IN_CRAWL_QUEUE}')
+        print(f'Max History: {constants.MAX_URLS_IN_CRAWL_HISTORY}')
+        print(f'Max emails: {constants.MAX_EMAILS_IN_EMAIL_QUEUE}\tChunks: {constants.MAX_EMAILS_INSERTED_AT_ONCE}')
     
     def parse_args(self, args):
         args = args.split(' ')

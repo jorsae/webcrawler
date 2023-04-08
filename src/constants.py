@@ -7,7 +7,7 @@ DATABASE_FILE = 'webcrawler.db'
 CRAWL_QUEUE_LOCK = threading.Lock()
 CRAWL_DATA_LOCK = threading.Lock()
 CRAWL_HISTORY_LOCK = threading.Lock()
-DOMAIN_LOCK = threading.Lock()
+DOMAIN_MODEL_LOCK = threading.Lock()
 CRAWL_EMAILS_LOCK = threading.Lock()
 
 
