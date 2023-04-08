@@ -26,6 +26,10 @@ class Commander(cmd.Cmd):
         
         print('Adding Crawl queue to database...')
         self.overseer.add_crawl_queue_database()
+        print('Adding Crawl History to database...')
+        self.overseer.add_crawl_history_database()
+        print('Adding Crawl Emails to database...')
+        Helper.add_crawl_email_database()
         return cmd.Cmd.postcmd(self, True, '')
 
     def do_spiders(self, arg):
@@ -72,9 +76,6 @@ class Commander(cmd.Cmd):
     def do_stop_all(self, arg):
         self.overseer.stop_all_spiders()
 
-    def do_list_queue(self, arg):
-        print(f'{len(Overseer.crawl_queue)=} {len(Overseer.crawl_history)=} {len(Helper.crawl_emails)=}')
-    
     def do_database_stats(self, arg):
         print('===== DATABASE STATS =====')
         # Can cause locked database.
