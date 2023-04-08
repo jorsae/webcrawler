@@ -49,12 +49,18 @@ class Commander(cmd.Cmd):
     
     def do_start_spider(self, arg):
         args = self.parse_args(arg)
-        
-        spider = self.overseer.create_spider()
-        if len(args) >= 1:
-            self.overseer.start_spider(spider.id, args[0])
+
+        if type(args[0]) == int:
+            # TODO: Fix, restarting a spider that has been stopped, does not work.
+            started_spider = self.overseer.start_spider(args[0])
         else:
-            self.overseer.start_spider(spider.id)
+            spider = self.overseer.create_spider()
+            started_spider = self.overseer.start_spider(spider.id)
+        
+        if started_spider:
+            print('Spider started successfully')
+        else:
+            print('Unable to start spider')
     
     def do_stop_spider(self, arg):
         args = self.parse_args(arg)

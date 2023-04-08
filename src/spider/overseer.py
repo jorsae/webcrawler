@@ -108,8 +108,11 @@ class Overseer:
         for spider in self.spiders:
             if spider.id == id:
                 spider.thread = threading.Thread(target=spider.worker.crawl, args=(url, ))
+                spider.worker.domain = None
                 spider.thread.start()
-        logging.info(f'Starting spider {spider.id} with: {url}')
+                logging.info(f'Starting spider {spider.id} with: {url}')
+                return True
+        return False
     
     def stop_all_spiders(self):
         # Faster to make all stop working before joining the threads
@@ -123,6 +126,7 @@ class Overseer:
     def stop_spider(self, id):
         for spider in self.spiders:
             if spider.id == id:
+                spider.stop_worker()
                 spider.stop_thread()
                 logging.info(f'Stopped spider: {spider.id}')
 
