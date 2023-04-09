@@ -21,6 +21,7 @@ class Worker:
         self.harvested_urls = set()
         self.crawl_history = []
         self.run = run
+        self.current = None
         logging.debug('Created Worker')
     
     def crawl(self, start_url=None):
@@ -42,6 +43,7 @@ class Worker:
                     url_domain.request_status = RequestStatus.NOT_ALLOWED
                 else:
                     # Parsing http request + content
+                    self.current = url_domain.url
                     req = requests.get(url_domain.url, timeout=constants.MAX_TIMEOUT)
                     url_domain.http_status_code = req.status_code
                     url_domain.request_status = RequestStatus.OK

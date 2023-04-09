@@ -19,5 +19,5 @@ class Spider:
 
     def __str__(self):
         if self.stop:
-            return f'[{self.id}](PAUSED) Q:{len(self.worker.queue)}/Urls:{len(self.worker.harvested_urls)}/History:{len(self.worker.crawl_history)}  thread:{self.thread.is_alive()}/run:{self.worker.run} - {self.worker.domain}'
-        return f'[{self.id}] Q:{len(self.worker.queue)}/Urls:{len(self.worker.harvested_urls)}/History:{len(self.worker.crawl_history)}  thread:{self.thread.is_alive()}/run:{self.worker.run} - {self.worker.domain}'
+            return f'[{self.id}](PAUSED) Q:{len(self.worker.queue)}/Urls:{len(self.worker.harvested_urls)}/History:{len(self.worker.crawl_history)}  thread:{self.thread.is_alive()}/run:{self.worker.run} - {self.worker.domain} - {self.worker.current}'
+        return f'[{self.id}] Q:{len(self.worker.queue)}/Urls:{len(self.worker.harvested_urls)}/History:{len(self.worker.crawl_history)}  thread:{self.thread.is_alive()}/run:{self.worker.run} - {self.worker.domain} - {self.worker.current}'
