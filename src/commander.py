@@ -24,7 +24,7 @@ class Commander(cmd.Cmd):
         self.overseer.run_overseer = False
         self.overseer_thread.join()
         
-        print('Adding Crawl queue to database...')
+        print('Adding Crawl Queue to database...')
         self.overseer.add_crawl_queue_database()
         print('Adding Crawl History to database...')
         self.overseer.add_crawl_history_database()
@@ -55,7 +55,6 @@ class Commander(cmd.Cmd):
         args = self.parse_args(arg)
 
         if type(args[0]) == int:
-            # TODO: Fix, restarting a spider that has been stopped, does not work.
             started_spider = self.overseer.start_spider(args[0])
         else:
             spider = self.overseer.create_spider()

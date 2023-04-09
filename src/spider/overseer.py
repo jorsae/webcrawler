@@ -53,12 +53,11 @@ class Overseer:
                         spider.worker.domain = None
                     domains.append(spider_domain_id)
                 
-                if spider.stop is False:
-                    if spider.thread is not None:
-                        if not spider.thread.is_alive():
-                            spider.thread.handled = True
-                            self.get_spider_urls(spider)
-                            self.start_spider(spider.id)
+                if spider.stop is False and spider.thread is not None:
+                    if not spider.thread.is_alive():
+                        spider.thread.handled = True
+                        self.get_spider_urls(spider)
+                        self.start_spider(spider.id)
             
             if len(Overseer.crawl_queue) >= constants.MAX_URLS_IN_CRAWL_QUEUE:
                 self.add_crawl_queue_database()
