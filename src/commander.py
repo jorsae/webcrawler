@@ -77,8 +77,18 @@ class Commander(cmd.Cmd):
 
     def do_stop_all(self, arg):
         self.overseer.stop_all_spiders()
+    
+    def do_stats(self, arg):
+        self.internal_stats(arg)
+        self.database_stats(arg)
 
-    def do_database_stats(self, arg):
+    def internal_stats(self, arg):
+        print('===== INTERNAL STATS =====')
+        print(f'Crawl Queue: {len(Overseer.crawl_queue)} / {constants.MAX_URLS_IN_CRAWL_QUEUE}')
+        print(f'Crawl History: {len(Overseer.crawl_history)} / {constants.MAX_URLS_IN_CRAWL_HISTORY}')
+        print(f'Crawl Emails: {len(Helper.crawl_emails)} / {constants.MAX_EMAILS_IN_EMAIL_QUEUE}\tchunks:({constants.MAX_EMAILS_INSERTED_AT_ONCE})')
+
+    def database_stats(self, arg):
         print('===== DATABASE STATS =====')
         # Can cause locked database.
         with constants.URL_STATUS_MODEL_LOCK:
@@ -99,16 +109,6 @@ class Commander(cmd.Cmd):
         with constants.URL_STATUS_MODEL_LOCK:
             url_statuses = f'Url Statuses: {UrlStatusModel.select().count():,}'
         print(f'{request_statuses} // {url_statuses}')
-    
-    def do_internal_stats(self, arg):
-        print('===== INTERNAL STATS =====')
-        print(f'Crawl Queue: {len(Overseer.crawl_queue)} / {constants.MAX_URLS_IN_CRAWL_QUEUE}')
-        print(f'Crawl History: {len(Overseer.crawl_history)} / {constants.MAX_URLS_IN_CRAWL_HISTORY}')
-        print(f'Crawl Emails: {len(Helper.crawl_emails)} / {constants.MAX_EMAILS_IN_EMAIL_QUEUE}\tchunks:({constants.MAX_EMAILS_INSERTED_AT_ONCE})')
-    
-    def do_stats(self, arg):
-        self.do_internal_stats(arg)
-        self.do_database_stats(arg)
     
     def do_settings(self, arg):
         print('===== SETTINGS =====')
