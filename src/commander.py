@@ -33,7 +33,7 @@ class Commander(cmd.Cmd):
         return cmd.Cmd.postcmd(self, True, '')
 
     def do_spiders(self, arg):
-        print(f'Overseer - t:{self.overseer_thread.is_alive()} / r:{self.overseer.run_overseer}')
+        print(f'\tOverseer - t:{self.overseer_thread.is_alive()} / r:{self.overseer.run_overseer}')
         for spider in self.overseer.spiders:
             print(f'{spider}')
     
@@ -72,6 +72,9 @@ class Commander(cmd.Cmd):
             print(f'stop_spider takes 1 arg: <id>')
         
         self.overseer.stop_spider(args[0])
+
+    def do_start_all(self, arg):
+        self.overseer.start_all_spiders()
 
     def do_stop_all(self, arg):
         self.overseer.stop_all_spiders()

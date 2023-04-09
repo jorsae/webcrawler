@@ -53,17 +53,17 @@ class Overseer:
                         spider.worker.domain = None
                     domains.append(spider_domain_id)
                 
-                if spider.thread is not None:
-                    if not spider.thread.is_alive():
-                        spider.thread.handled = True
-                        self.get_spider_urls(spider)
-                        self.start_spider(spider.id)
+                if spider.stop is False:
+                    if spider.thread is not None:
+                        if not spider.thread.is_alive():
+                            spider.thread.handled = True
+                            self.get_spider_urls(spider)
+                            self.start_spider(spider.id)
             
             if len(Overseer.crawl_queue) >= constants.MAX_URLS_IN_CRAWL_QUEUE:
                 self.add_crawl_queue_database()
             
             time.sleep(1)
-        print('Overseer stopped')
     
     def get_spider_urls(self, spider):
         queue_len = len(spider.worker.queue)
@@ -108,27 +108,35 @@ class Overseer:
         for spider in self.spiders:
             if spider.id == id:
                 spider.thread = threading.Thread(target=spider.worker.crawl, args=(url, ))
+                spider.worker.run = True
+                spider.stop = False
                 spider.worker.domain = None
                 spider.thread.start()
                 logging.info(f'Starting spider {spider.id} with: {url}')
                 return True
         return False
     
+    def start_all_spiders(self):
+        for spider in self.spiders:
+            self.start_spider(spider.id)
+    
+    def stop_spider(self, id):
+        for spider in self.spiders:
+            if spider.id == id:
+                spider.stop = True
+                spider.stop_worker()
+                spider.stop_thread()
+                logging.info(f'Stopped spider: {spider.id}')
+
     def stop_all_spiders(self):
         # Faster to make all stop working before joining the threads
         for spider in self.spiders:
+            spider.stop = True
             spider.stop_worker()
         
         for spider in self.spiders:
             spider.stop_thread()
             logging.info(f'Stopped spider: {spider.id}')
-
-    def stop_spider(self, id):
-        for spider in self.spiders:
-            if spider.id == id:
-                spider.stop_worker()
-                spider.stop_thread()
-                logging.info(f'Stopped spider: {spider.id}')
 
     def add_crawl_queue_database(self):
         logging.debug(f'Adding items to crawl_queue: {len(Overseer.crawl_queue)}')

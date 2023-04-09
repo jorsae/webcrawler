@@ -6,6 +6,7 @@ class Spider:
         self.worker = worker
         self.id = id
         self.thread = thread
+        self.stop = False # Used to user-control to manually stop the spider
         logging.debug('Created Spider')
     
     def stop_worker(self):
@@ -17,4 +18,6 @@ class Spider:
         self.thread.join()
 
     def __str__(self):
-        return f'[{self.id}] thread:{self.thread.is_alive()}/run:{self.worker.run} - {self.worker.domain}'
+        if self.stop:
+            return f'[{self.id}](PAUSED) Q:{len(self.worker.queue)}/Urls:{len(self.worker.harvested_urls)}/History:{len(self.worker.crawl_history)}  thread:{self.thread.is_alive()}/run:{self.worker.run} - {self.worker.domain}'
+        return f'[{self.id}] Q:{len(self.worker.queue)}/Urls:{len(self.worker.harvested_urls)}/History:{len(self.worker.crawl_history)}  thread:{self.thread.is_alive()}/run:{self.worker.run} - {self.worker.domain}'
