@@ -10,20 +10,33 @@ from utility import UrlStatus, RequestStatus
 import arguments
 import constants
 
+import signal
+import sys
+
+commander = None
+
+def signal_handler(signal, frame):
+    commander.do_exit(None)
+    sys.exit()
+
 def main():
+    global commander
     setup_logging()
-    # setup_exit_handler()
     
     args = arguments.parse_arguments()
     overseer = Overseer(database)
     arguments.run_arguments(args, overseer)
     
+    signal.signal(signal.SIGINT, signal_handler) # signal handler for ctrl+c
+    
     create_tables()
     fill_url_status_model()
     fill_request_status_model()
+    
     Helper() #initialize the url_status & request_status lists
     
-    Commander(overseer).cmdloop()
+    commander = Commander(overseer)
+    commander.cmdloop()
 
 def fill_request_status_model():
     with constants.REQUEST_STATUS_MODEL_LOCK:
