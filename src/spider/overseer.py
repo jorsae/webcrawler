@@ -62,7 +62,7 @@ class Overseer:
             if len(Overseer.crawl_queue) >= constants.MAX_URLS_IN_CRAWL_QUEUE:
                 self.add_crawl_queue_database()
             
-            time.sleep(1)
+            time.sleep(constants.OVERSEER_RUN_DELAY / 1000)
     
     def get_spider_urls(self, spider):
         queue_len = len(spider.worker.queue)

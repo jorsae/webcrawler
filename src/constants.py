@@ -1,8 +1,6 @@
 import re
 import threading
 
-DATABASE_FILE = 'webcrawler.db'
-
 # Thread locks
 CRAWL_QUEUE_LOCK = threading.Lock()
 CRAWL_DATA_LOCK = threading.Lock()
@@ -11,6 +9,10 @@ DOMAIN_MODEL_LOCK = threading.Lock()
 CRAWL_EMAILS_LOCK = threading.Lock()
 URL_STATUS_MODEL_LOCK = threading.Lock()
 REQUEST_STATUS_MODEL_LOCK = threading.Lock()
+
+
+DATABASE_FILE = 'webcrawler.db'
+OVERSEER_RUN_DELAY = 1000 # ms
 
 
 MAX_TIMEOUT = 5
