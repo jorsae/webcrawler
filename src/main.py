@@ -3,6 +3,7 @@ from models import *
 from spider import Worker, Overseer, Helper
 import logging
 import os
+import datetime
 
 from commander import Commander
 
@@ -14,8 +15,16 @@ import signal
 import sys
 
 commander = None
+last = datetime.datetime.now()
 
 def signal_handler(signal, frame):
+    global last
+    now = datetime.datetime.now()
+    if (now - last) <= datetime.timedelta(seconds=1):
+        print('Force killing process')
+        sys.exit()
+    
+    last = datetime.datetime.now()
     commander.do_exit(None)
     sys.exit()
 
