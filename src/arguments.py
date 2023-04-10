@@ -1,13 +1,19 @@
 import argparse
 
-from models import database
 import constants
+from models import database
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--database', '-d', type=str, default='webcrawler.db', help='Database file')
-    parser.add_argument('--threads', '-t', type=int, default=0, help='Spider threads to start with')
+    parser.add_argument(
+        "--database", "-d", type=str, default="webcrawler.db", help="Database file"
+    )
+    parser.add_argument(
+        "--threads", "-t", type=int, default=0, help="Spider threads to start with"
+    )
     return parser.parse_args()
+
 
 def run_arguments(args, overseer):
     constants.DATABASE_FILE = args.database

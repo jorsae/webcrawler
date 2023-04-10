@@ -1,2 +1,1 @@
-from processor import url
-from processor import data
+from processor import data, url

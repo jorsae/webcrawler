@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class RequestStatus(Enum):
     OK = 1
     TIMEOUT = 2

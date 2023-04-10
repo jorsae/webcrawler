@@ -1,14 +1,16 @@
 import logging
-import requests
 import time
 from datetime import datetime
 from urllib.parse import urlparse
 
-from models import CrawlQueueModel, CrawlHistoryModel, CrawlDataModel
-import spider
-from utility import RequestStatus, UrlDomain, RobotParser
-import processor
+import requests
+
 import constants
+import processor
+import spider
+from models import CrawlDataModel, CrawlHistoryModel, CrawlQueueModel
+from utility import RequestStatus, RobotParser, UrlDomain
+
 
 class Worker:
     def __init__(self, database, id, run=True):
@@ -16,30 +18,30 @@ class Worker:
         self.id = id
         self.queue = set()
         self.robot_parser = None
-        self.last_robots_domain = ''
+        self.last_robots_domain = ""
         self.domain = None
         self.harvested_urls = set()
         self.crawl_history = []
         self.run = run
         self.current = None
-        logging.debug('Created Worker')
-    
+        logging.debug("Created Worker")
+
     def crawl(self, start_url=None):
-        logging.info(f'Worker {self.id} starting crawl')
-        
+        logging.info(f"Worker {self.id} starting crawl")
+
         if start_url is not None:
             self.queue.add(start_url)
-        
+
         while len(self.queue) > 0 and self.run:
             url_domain = UrlDomain(self.queue.pop())
             if url_domain is None:
-                logging.error(f'[{self.id}] url_domain is None')
+                logging.error(f"[{self.id}] url_domain is None")
                 continue
             self.ensure_robots_parsed(url_domain.url)
-            logging.debug(f'{str(url_domain)=}')
+            logging.debug(f"{str(url_domain)=}")
             try:
                 if self.robot_parser.can_fetch(url_domain.url) is False:
-                    logging.debug(f'[{self.id}] Not allowed to crawl: {url_domain.url}')
+                    logging.debug(f"[{self.id}] Not allowed to crawl: {url_domain.url}")
                     url_domain.request_status = RequestStatus.NOT_ALLOWED
                 else:
                     # Parsing http request + content
@@ -51,7 +53,7 @@ class Worker:
                     data = processor.data.get_visible_data(req.text)
                     spider.Overseer.add_crawl_queue(harvested_urls)
                     self.add_crawl_history(url_domain, data)
-                    
+
                     emails = processor.url.get_emails(url_domain.url, req.text)
                     spider.Helper.add_crawl_email(emails)
             except requests.Timeout as ex_timeout:
@@ -69,43 +71,44 @@ class Worker:
             except Exception as e:
                 logging.warning(e)
                 url_domain.request_status = RequestStatus.ERROR
-            
+
             # Deleting from queue
             self.remove_from_queue(url_domain.url)
-            
+
             # Update the domain url_status
-            logging.debug(f'{url_domain=}')
+            logging.debug(f"{url_domain=}")
             if self.robot_parser.url_status_updated is False:
-                self.robot_parser.url_status_updated = spider.Helper.update_domain_url_status(self.robot_parser, self.domain)
+                self.robot_parser.url_status_updated = spider.Helper.update_domain_url_status(
+                    self.robot_parser, self.domain
+                )
 
             # Wait if website has a crawl-delay
             if self.robot_parser is not None:
-                request_rate = self.robot_parser.robot_parser.request_rate('*')
+                request_rate = self.robot_parser.robot_parser.request_rate("*")
                 if request_rate is not None:
                     time.sleep(request_rate)
-        
-        logging.info(f'Worker {self.id} finished crawl: {self.run}')
+
+        logging.info(f"Worker {self.id} finished crawl: {self.run}")
         self.robot_parser = None
-    
+
     def add_crawl_history(self, url_domain, data):
         with constants.CRAWL_HISTORY_LOCK:
-            crawl_history, crawl_history_created = (CrawlHistoryModel.get_or_create(
-                url = url_domain.url,
-                timestamp = datetime.now(),
-                http_status_code = url_domain.http_status_code,
-                request_status = spider.Helper.request_status[url_domain.request_status.name],
-                domain_id = url_domain.get_domain_id()
-            ))
+            crawl_history, crawl_history_created = CrawlHistoryModel.get_or_create(
+                url=url_domain.url,
+                timestamp=datetime.now(),
+                http_status_code=url_domain.http_status_code,
+                request_status=spider.Helper.request_status[url_domain.request_status.name],
+                domain_id=url_domain.get_domain_id(),
+            )
         if crawl_history_created is False:
-            logging.error(f'Failed to add crawl_history to CrawlHistoryModel: {url_domain=}')
-        
+            logging.error(f"Failed to add crawl_history to CrawlHistoryModel: {url_domain=}")
+
         with constants.CRAWL_DATA_LOCK:
-            crawl_data, crawl_data_created = (CrawlDataModel.get_or_create(
-                data = data,
-                crawl_history_id = crawl_history.id
-            ))
+            crawl_data, crawl_data_created = CrawlDataModel.get_or_create(
+                data=data, crawl_history_id=crawl_history.id
+            )
         if crawl_data_created is False:
-            logging.error(f'Failed to add crawl_data to CrawlDataModel: {data=}')
+            logging.error(f"Failed to add crawl_data to CrawlDataModel: {data=}")
 
     def remove_from_queue(self, url):
         try:
@@ -113,24 +116,24 @@ class Worker:
                 CrawlQueueModel.delete().where(CrawlQueueModel.url == url).execute()
         except Exception as e:
             logging.error(e)
-    
+
     def ensure_robots_parsed(self, url):
         try:
             # If both passes, it's same url
             if self.robot_parser is not None:
                 if self.robot_parser.same_robot(url):
                     return
-            
+
             self.robot_parser = RobotParser(self.id, self.get_robots_url(url))
             self.robot_parser.url_status = self.robot_parser.parse()
             self.domain = UrlDomain(url)
         except Exception as e:
             logging.critical(e)
-    
+
     def get_robots_url(self, url):
         try:
             uparse = urlparse(url)
-            return f'{uparse.scheme}://{uparse.netloc}/robots.txt'
+            return f"{uparse.scheme}://{uparse.netloc}/robots.txt"
         except Exception as e:
             logging.error(e)
             return url
