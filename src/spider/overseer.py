@@ -47,20 +47,34 @@ class Overseer:
 
     def run(self):
         while self.run_overseer:
-            domains = []
+            used_domains = []
             for spider in self.spiders:
-                # Check spiders domain id for duplicate
+                # Spider has domain
                 if spider.worker.domain is not None:
                     spider_domain_id = spider.worker.domain.get_domain_id()
-                    if spider_domain_id in domains:
-                        spider.worker.domain = None
-                    domains.append(spider_domain_id)
+                    if spider_domain_id is not None:
+                        used_domains.append(spider_domain_id)
 
-                if spider.stop is False and spider.thread is not None:
-                    if not spider.thread.is_alive():
-                        spider.thread.handled = True
-                        self.get_spider_urls(spider)
-                        self.start_spider(spider.id)
+            new_domain_count = 0
+            for spider in self.spiders:
+                # Spider is put on pause
+                if spider.stop:
+                    continue
+                # No spider thread
+                if spider.thread is None:
+                    logging.error(f"No spider.thread: {spider}")
+                    continue
+                spider.thread.handled = True
+                # Refill urls to spider if needed & possible
+                self.get_spider_urls(spider)
+                # Find new domain for the spider
+                if spider.worker.domain is None or len(spider.worker.queue) <= 0:
+                    added_new_domain = self.get_spider_domain(
+                        spider, used_domains, new_domain_count
+                    )
+                    if added_new_domain:
+                        new_domain_count += 1
+                    self.start_spider(spider.id)
 
             if len(Overseer.crawl_queue) >= constants.MAX_URLS_IN_CRAWL_QUEUE:
                 self.add_crawl_queue_database()
@@ -70,7 +84,10 @@ class Overseer:
     def get_spider_urls(self, spider):
         queue_len = len(spider.worker.queue)
         # Refill urls with same domain
-        if len(spider.worker.queue) <= 0 and spider.worker.domain is not None:
+        if (
+            len(spider.worker.queue) <= constants.MIN_URLS_IN_WORKER_QUEUE
+            and spider.worker.domain is not None
+        ):
             urls = (
                 CrawlQueueModel.select(CrawlQueueModel.url)
                 .where(CrawlQueueModel.domain_id == spider.worker.domain.get_domain_id())
@@ -79,26 +96,24 @@ class Overseer:
             for url in urls:
                 spider.worker.queue.add(url.url)
 
-        # Spider has no domain OR refilling previously had no more urls.
-        # Get new domain for the spider
-        if spider.worker.domain is None or len(spider.worker.queue) <= 0:
-            domains = []
-            for sp in self.spiders:
-                if sp.worker.domain is not None and sp.worker.run:
-                    domains.append(sp.worker.domain.get_domain_id())
-
-            new_url = (
-                CrawlQueueModel.select()
-                .where(CrawlQueueModel.domain_id.not_in(domains))
-                .order_by(CrawlQueueModel.priority)
-                .limit(1)
-            )
-            if len(new_url) > 0:
-                spider.worker.queue.add(new_url[0].url)
-            else:
-                logging.debug("No urls for the spider")
-
         logging.info(f"Filled queue from: {queue_len} --> {len(spider.worker.queue)}")
+
+    def get_spider_domain(self, spider, used_domains, new_domain_count):
+        new_url = (
+            CrawlQueueModel.select(CrawlQueueModel.url)
+            .where(CrawlQueueModel.domain_id.not_in(used_domains))
+            .order_by(CrawlQueueModel.priority)
+            .group_by(CrawlQueueModel.domain_id)
+            .limit(new_domain_count + 1)
+        )
+        if len(new_url) > 0:
+            spider.worker.domain = None
+            spider.worker.queue.add(new_url[new_domain_count].url)
+            logging.debug(f"[{spider.id}] Assigned url: {new_url[new_domain_count].url}")
+            return True
+        else:
+            logging.debug("No urls for the spider")
+            return False
 
     def create_spider(self):
         worker = Worker(database, self.__spider_ids)
@@ -113,7 +128,6 @@ class Overseer:
                 spider.thread = threading.Thread(target=spider.worker.crawl, args=(url,))
                 spider.worker.run = True
                 spider.stop = False
-                spider.worker.domain = None
                 spider.thread.start()
                 logging.info(f"Starting spider {spider.id} with: {url}")
                 return True

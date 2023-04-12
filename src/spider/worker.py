@@ -18,15 +18,18 @@ class Worker:
         self.id = id
         self.queue = set()
         self.robot_parser = None
-        self.last_robots_domain = ""
         self.domain = None
         self.harvested_urls = set()
-        self.crawl_history = []
         self.run = run
         self.current = None
         logging.debug("Created Worker")
 
     def crawl(self, start_url=None):
+        # TODO: Seems to be issue with RobotParser.
+        # Program sends all requests at once and line 33, robot_parser = None.
+        # Gets executed BEFORE all requests finish so line 81 is set to None prematurely
+        # And causes issues. reddit.com is good url to test it on.
+        # Maybe it's the overseer that is doing it?
         logging.info(f"Worker {self.id} starting crawl")
 
         if start_url is not None:
@@ -39,13 +42,14 @@ class Worker:
                 continue
             self.ensure_robots_parsed(url_domain.url)
             logging.debug(f"{str(url_domain)=}")
+
             try:
+                self.current = url_domain.url
                 if self.robot_parser.can_fetch(url_domain.url) is False:
                     logging.debug(f"[{self.id}] Not allowed to crawl: {url_domain.url}")
                     url_domain.request_status = RequestStatus.NOT_ALLOWED
                 else:
                     # Parsing http request + content
-                    self.current = url_domain.url
                     req = requests.get(url_domain.url, timeout=constants.MAX_TIMEOUT)
                     url_domain.http_status_code = req.status_code
                     url_domain.request_status = RequestStatus.OK
@@ -76,7 +80,6 @@ class Worker:
             self.remove_from_queue(url_domain.url)
 
             # Update the domain url_status
-            logging.debug(f"{url_domain=}")
             if self.robot_parser.url_status_updated is False:
                 self.robot_parser.url_status_updated = spider.Helper.update_domain_url_status(
                     self.robot_parser, self.domain
@@ -88,8 +91,8 @@ class Worker:
                 if request_rate is not None:
                     time.sleep(request_rate)
 
+        # self.robot_parser = None
         logging.info(f"Worker {self.id} finished crawl: {self.run}")
-        self.robot_parser = None
 
     def add_crawl_history(self, url_domain, data):
         with constants.CRAWL_HISTORY_LOCK:
