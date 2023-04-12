@@ -25,11 +25,6 @@ class Worker:
         logging.debug("Created Worker")
 
     def crawl(self, start_url=None):
-        # TODO: Seems to be issue with RobotParser.
-        # Program sends all requests at once and line 33, robot_parser = None.
-        # Gets executed BEFORE all requests finish so line 81 is set to None prematurely
-        # And causes issues. reddit.com is good url to test it on.
-        # Maybe it's the overseer that is doing it?
         logging.info(f"Worker {self.id} starting crawl")
 
         if start_url is not None:
