@@ -4,6 +4,8 @@ import threading
 import time
 from datetime import datetime
 
+import psutil
+
 import constants
 import spider
 from models import *
@@ -46,6 +48,8 @@ class Overseer:
         logging.debug("Created Overseer")
 
     def run(self):
+        process = psutil.Process()
+        index = 0
         while self.run_overseer:
             used_domains = []
             for spider in self.spiders:
@@ -81,6 +85,13 @@ class Overseer:
             if len(Overseer.crawl_queue) >= constants.MAX_URLS_IN_CRAWL_QUEUE:
                 self.add_crawl_queue_database()
 
+            if index > 10:
+                mib = round(process.memory_info().rss / 1024 / 1024, 2)
+                logging.debug(
+                    f"CPU:{psutil.cpu_percent()}% / MEM:{psutil.virtual_memory().percent}% ({mib}MiB) | crawl_history:{len(self.crawl_history)} / crawl_queue:{len(self.crawl_queue)}"
+                )
+                index = 10
+            index += 1
             time.sleep(constants.OVERSEER_RUN_DELAY / 1000)
 
     def get_spider_urls(self, spider):
