@@ -25,7 +25,7 @@ class Worker:
         logging.debug("Created Worker")
 
     def crawl(self, start_url=None):
-        logging.info(f"Worker {self.id} starting crawl")
+        logging.info(f"Worker {self.id} starting crawl | q: {len(self.queue)}")
 
         if start_url is not None:
             self.queue.add(start_url)

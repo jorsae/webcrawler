@@ -64,6 +64,8 @@ class Overseer:
                 if spider.thread is None:
                     logging.error(f"No spider.thread: {spider}")
                     continue
+                if spider.thread.is_alive() is False:
+                    self.start_spider(spider.id)
                 spider.thread.handled = True
                 # Refill urls to spider if needed & possible
                 self.get_spider_urls(spider)
