@@ -20,8 +20,10 @@ class Overseer:
         try:
             with constants.CRAWL_QUEUE_LOCK:
                 if type(value) == list:
+                    logging.debug(f"Added to Overseer.crawl_queue: {len(value)} items")
                     Overseer.crawl_queue += value
                 else:
+                    logging.debug(f"Added to Overseer.crawl_queue: 1 item")
                     Overseer.crawl_history.append(value)
         except Exception as e:
             logging.critical("Failed to add items to crawl_queue")
@@ -33,8 +35,10 @@ class Overseer:
         try:
             with constants.CRAWL_HISTORY_LOCK:
                 if type(value) == list:
+                    logging.debug(f"Added to Overseer.crawl_history: {len(value)} items")
                     Overseer.crawl_history += value
                 else:
+                    logging.debug(f"Added to Overseer.crawl_history: 1 item")
                     Overseer.crawl_history.append(value)
         except Exception as e:
             logging.critical("Failed to add items to crawl_history")
