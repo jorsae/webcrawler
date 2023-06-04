@@ -9,6 +9,7 @@ import psutil
 import constants
 import spider
 from models import *
+from settings import Settings
 from spider import Spider, Worker
 
 
@@ -82,7 +83,7 @@ class Overseer:
                         new_domain_count += 1
                     self.start_spider(spider.id)
 
-            if len(Overseer.crawl_queue) >= constants.MAX_URLS_IN_CRAWL_QUEUE:
+            if len(Overseer.crawl_queue) >= Settings.MAX_URLS_IN_CRAWL_QUEUE:
                 self.add_crawl_queue_database()
 
             if index > 10:
@@ -92,19 +93,19 @@ class Overseer:
                 )
                 index = 10
             index += 1
-            time.sleep(constants.OVERSEER_RUN_DELAY / 1000)
+            time.sleep(Settings.OVERSEER_RUN_DELAY / 1000)
 
     def get_spider_urls(self, spider, index=0):
         queue_len = len(spider.worker.queue)
         # Refill urls with same domain
         if (
-            len(spider.worker.queue) <= constants.MIN_URLS_IN_WORKER_QUEUE
+            len(spider.worker.queue) <= Settings.MIN_URLS_IN_WORKER_QUEUE
             and spider.worker.domain is not None
         ):
             urls = (
                 CrawlQueueModel.select(CrawlQueueModel.url)
                 .where(CrawlQueueModel.domain_id == spider.worker.domain.get_domain_id())
-                .limit(constants.MAX_URLS_IN_WORKER_QUEUE)
+                .limit(Settings.MAX_URLS_IN_WORKER_QUEUE)
             )
             for url in urls:
                 spider.worker.queue.add(url.url)

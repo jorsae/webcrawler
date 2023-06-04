@@ -4,6 +4,7 @@ import threading
 import constants
 import utility.UrlStatus
 from models import *
+from settings import Settings
 from spider import Helper, Overseer
 
 
@@ -86,12 +87,12 @@ class Commander(cmd.Cmd):
 
     def internal_stats(self, arg):
         print("===== INTERNAL STATS =====")
-        print(f"Crawl Queue: {len(Overseer.crawl_queue)} / {constants.MAX_URLS_IN_CRAWL_QUEUE}")
+        print(f"Crawl Queue: {len(Overseer.crawl_queue)} / {Settings.MAX_URLS_IN_CRAWL_QUEUE}")
         print(
-            f"Crawl History: {len(Overseer.crawl_history)} / {constants.MAX_URLS_IN_CRAWL_HISTORY}"
+            f"Crawl History: {len(Overseer.crawl_history)} / {Settings.MAX_URLS_IN_CRAWL_HISTORY}"
         )
         print(
-            f"Crawl Emails: {len(Helper.crawl_emails)} / {constants.MAX_EMAILS_IN_EMAIL_QUEUE}\tchunks:({constants.MAX_EMAILS_INSERTED_AT_ONCE})"
+            f"Crawl Emails: {len(Helper.crawl_emails)} / {Settings.MAX_EMAILS_IN_EMAIL_QUEUE}\tchunks:({Settings.MAX_EMAILS_INSERTED_AT_ONCE})"
         )
 
     def database_stats(self, arg):
@@ -122,16 +123,25 @@ class Commander(cmd.Cmd):
 
     def do_settings(self, arg):
         print("===== SETTINGS =====")
-        print(f"Database: {constants.DATABASE_FILE}")
-        print(f"Request Timeout: {constants.MAX_TIMEOUT}")
+        print(f"Database: {Settings.DATABASE_FILE}")
+        print(f"Overseer run: {Settings.OVERSEER_RUN_DELAY}ms")
+        print(f"Request Timeout: {Settings.MAX_TIMEOUT}")
         print(
-            f"Urls in worker queue: {constants.MIN_URLS_IN_WORKER_QUEUE}-{constants.MAX_URLS_IN_WORKER_QUEUE}"
+            f"Urls in worker queue: {Settings.MIN_URLS_IN_WORKER_QUEUE}-{Settings.MAX_URLS_IN_WORKER_QUEUE}"
         )
-        print(f"Max Crawl Queue: {constants.MAX_URLS_IN_CRAWL_QUEUE}")
-        print(f"Max History: {constants.MAX_URLS_IN_CRAWL_HISTORY}")
+        print(f"Max Crawl Queue: {Settings.MAX_URLS_IN_CRAWL_QUEUE}")
+        print(f"Max History: {Settings.MAX_URLS_IN_CRAWL_HISTORY}")
         print(
-            f"Max emails: {constants.MAX_EMAILS_IN_EMAIL_QUEUE}\tChunks: {constants.MAX_EMAILS_INSERTED_AT_ONCE}"
+            f"Max emails: {Settings.MAX_EMAILS_IN_EMAIL_QUEUE}\tChunks: {Settings.MAX_EMAILS_INSERTED_AT_ONCE}"
         )
+
+    def do_save(self, arg):
+        saved = Settings.save_settings()
+        print(f"{saved=}")
+
+    def do_reload(self, arg):
+        reloaded = Settings.parse_settings()
+        print(f"{reloaded=}")
 
     def parse_args(self, args):
         args = args.split(" ")

@@ -4,6 +4,7 @@ from datetime import datetime
 import constants
 import spider
 from models import CrawlEmailModel, DomainModel, RequestStatusModel, UrlStatusModel
+from settings import Settings
 
 
 class Helper:
@@ -57,7 +58,7 @@ class Helper:
                     Helper.crawl_emails += value
                 else:
                     Helper.crawl_emails.append(value)
-            if len(Helper.crawl_emails) > constants.MAX_EMAILS_IN_EMAIL_QUEUE:
+            if len(Helper.crawl_emails) > Settings.MAX_EMAILS_IN_EMAIL_QUEUE:
                 Helper.add_crawl_email_database()
         except Exception as e:
             logging.error(f"Failed to add items to crawl_emails: {e}")
@@ -70,7 +71,7 @@ class Helper:
                 now = datetime.now()
                 for email in Helper.crawl_emails:
                     Helper.crawl_emails.remove(email)
-                    if emails > constants.MAX_EMAILS_INSERTED_AT_ONCE:
+                    if emails > Settings.MAX_EMAILS_INSERTED_AT_ONCE:
                         break
                     email_objects.append({"email": email, "timestamp": now})
                     emails += 1

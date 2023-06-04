@@ -9,6 +9,7 @@ import constants
 import processor
 import spider
 from models import CrawlDataModel, CrawlHistoryModel, CrawlQueueModel
+from settings import Settings
 from utility import RequestStatus, RobotParser, UrlDomain
 
 
@@ -45,7 +46,7 @@ class Worker:
                     url_domain.request_status = RequestStatus.NOT_ALLOWED
                 else:
                     # Parsing http request + content
-                    req = requests.get(url_domain.url, timeout=constants.MAX_TIMEOUT)
+                    req = requests.get(url_domain.url, timeout=Settings.MAX_TIMEOUT)
                     url_domain.http_status_code = req.status_code
                     url_domain.request_status = RequestStatus.OK
                     harvested_urls = processor.url.get_urls(url_domain.url, req.text)

@@ -1,7 +1,7 @@
 import argparse
 
-import constants
 from models import database
+from settings import Settings
 
 
 def parse_arguments():
@@ -16,7 +16,7 @@ def parse_arguments():
 
 
 def run_arguments(args, overseer):
-    constants.DATABASE_FILE = args.database
+    Settings.DATABASE_FILE = args.database
     database.init(args.database)
 
     for i in range(args.threads):

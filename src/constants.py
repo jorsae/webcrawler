@@ -10,22 +10,6 @@ CRAWL_EMAILS_LOCK = threading.Lock()
 URL_STATUS_MODEL_LOCK = threading.Lock()
 REQUEST_STATUS_MODEL_LOCK = threading.Lock()
 
-
-DATABASE_FILE = "webcrawler.db"
-OVERSEER_RUN_DELAY = 1000  # ms
-
-
-MAX_TIMEOUT = 5
-
-MIN_URLS_IN_WORKER_QUEUE = 3
-MAX_URLS_IN_WORKER_QUEUE = 20
-
-MAX_URLS_IN_CRAWL_QUEUE = 250
-MAX_URLS_IN_CRAWL_HISTORY = 30
-
-MAX_EMAILS_IN_EMAIL_QUEUE = 20
-MAX_EMAILS_INSERTED_AT_ONCE = 999
-
 REGEX_URL = re.compile(
     r"^(?:http|ftp)s?://"  # http:// or https://
     r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|"  # domain...
