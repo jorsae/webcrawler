@@ -94,7 +94,7 @@ class Overseer:
             index += 1
             time.sleep(constants.OVERSEER_RUN_DELAY / 1000)
 
-    def get_spider_urls(self, spider):
+    def get_spider_urls(self, spider, index=0):
         queue_len = len(spider.worker.queue)
         # Refill urls with same domain
         if (
@@ -109,7 +109,12 @@ class Overseer:
             for url in urls:
                 spider.worker.queue.add(url.url)
 
-        logging.info(f"Filled queue from: {queue_len} --> {len(spider.worker.queue)}")
+        if len(spider.worker.queue) <= 0 and index == 0:
+            logging.info("Filled queue is empty, force dumping Overseer.crawl_queue and re-trying")
+            self.add_crawl_queue_database()
+            self.get_spider_urls(spider, 1)
+        else:
+            logging.info(f"Filled queue from: {queue_len} --> {len(spider.worker.queue)}")
 
     def get_spider_domain(self, spider, used_domains, new_domain_count):
         new_url = (

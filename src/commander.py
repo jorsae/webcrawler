@@ -125,7 +125,7 @@ class Commander(cmd.Cmd):
         print(f"Database: {constants.DATABASE_FILE}")
         print(f"Request Timeout: {constants.MAX_TIMEOUT}")
         print(
-            f"Urls in worker queue: {constants.MIN_URLS_IN_WORKER_QUEUE} - {constants.MAX_URLS_IN_WORKER_QUEUE}"
+            f"Urls in worker queue: {constants.MIN_URLS_IN_WORKER_QUEUE}-{constants.MAX_URLS_IN_WORKER_QUEUE}"
         )
         print(f"Max Crawl Queue: {constants.MAX_URLS_IN_CRAWL_QUEUE}")
         print(f"Max History: {constants.MAX_URLS_IN_CRAWL_HISTORY}")
