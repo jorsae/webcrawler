@@ -27,6 +27,8 @@ class Settings:
             Settings.MAX_URLS_IN_CRAWL_HISTORY = data.get("max_urls_in_crawl_history")
             Settings.MAX_EMAILS_IN_EMAIL_QUEUE = data.get("max_emails_in_email_queue")
             Settings.MAX_EMAILS_INSERTED_AT_ONCE = data.get("max_emails_inserted_at_once")
+
+            logging.info("Loaded settings successfully")
             return True
         except Exception as e:
             logging.critical(f"Failed to parse_settings: {e}")
