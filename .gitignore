@@ -1,6 +1,7 @@
 # Custom
 TODO
 *.db
+*.json
 error-logs/*
 
 # Byte-compiled / optimized / DLL files

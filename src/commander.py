@@ -135,13 +135,40 @@ class Commander(cmd.Cmd):
             f"Max emails: {Settings.MAX_EMAILS_IN_EMAIL_QUEUE}\tChunks: {Settings.MAX_EMAILS_INSERTED_AT_ONCE}"
         )
 
+    def do_deepsettings(self, arg):
+        print(f"{Settings.SETTINGS_FILE=}")
+        print(f"{Settings.DATABASE_FILE=}")
+        print(f"{Settings.OVERSEER_RUN_DELAY=}")
+        print(f"{Settings.MAX_TIMEOUT=}")
+        print(f"{Settings.MIN_URLS_IN_WORKER_QUEUE=}")
+        print(f"{Settings.MAX_URLS_IN_WORKER_QUEUE=}")
+        print(f"{Settings.MAX_URLS_IN_CRAWL_QUEUE=}")
+        print(f"{Settings.MAX_URLS_IN_CRAWL_HISTORY=}")
+        print(f"{Settings.MAX_EMAILS_IN_EMAIL_QUEUE=}")
+        print(f"{Settings.MAX_EMAILS_INSERTED_AT_ONCE=}")
+
+    def do_change(self, arg):
+        args = self.parse_args(arg)
+        if len(args) != 2:
+            print("csettings takes 2 arguments: setting_name value")
+            return
+
+        setting_name = args[0]
+        value = args[1]
+        updated = Settings.update_setting(setting_name, value)
+
+        if updated is False:
+            print(f"Failed to update setting: {setting_name} to {value}")
+
     def do_save(self, arg):
         saved = Settings.save_settings()
-        print(f"{saved=}")
+        if saved is False:
+            print("Failed to save settings")
 
     def do_reload(self, arg):
         reloaded = Settings.parse_settings()
-        print(f"{reloaded=}")
+        if reloaded is False:
+            print("Failed to reload settings")
 
     def parse_args(self, args):
         args = args.split(" ")

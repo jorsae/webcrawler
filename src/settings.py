@@ -55,3 +55,32 @@ class Settings:
         except Exception as e:
             logging.error(f"Failed to save settings: {e}")
             return False
+
+    @staticmethod
+    def update_setting(setting_name, value, save_changes=True):
+        return_value = True
+
+        match setting_name.upper():
+            case "OVERSEER_RUN_DELAY":
+                Settings.OVERSEER_RUN_DELAY = value
+            case "MAX_TIMEOUT":
+                Settings.MAX_TIMEOUT = value
+            case "MIN_URLS_IN_WORKER_QUEUE":
+                Settings.MIN_URLS_IN_WORKER_QUEUE = value
+            case "MAX_URLS_IN_WORKER_QUEUE":
+                Settings.MAX_URLS_IN_WORKER_QUEUE = value
+            case "MAX_URLS_IN_CRAWL_QUEUE":
+                Settings.MAX_URLS_IN_CRAWL_QUEUE = value
+            case "MAX_URLS_IN_CRAWL_HISTORY":
+                Settings.MAX_URLS_IN_CRAWL_HISTORY = value
+            case "MAX_EMAILS_IN_EMAIL_QUEUE":
+                Settings.MAX_EMAILS_IN_EMAIL_QUEUE = value
+            case "MAX_EMAILS_INSERTED_AT_ONCE":
+                Settings.MAX_EMAILS_INSERTED_AT_ONCE = value
+            case _:
+                return_value = False
+
+        if save_changes:
+            Settings.save_settings()
+
+        return return_value
