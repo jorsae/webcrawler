@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 
 
 class Settings:
@@ -16,6 +17,9 @@ class Settings:
     MAX_EMAILS_INSERTED_AT_ONCE = 999
 
     def parse_settings():
+        if os.path.isfile(Settings.SETTINGS_FILE) is False:
+            return
+
         try:
             with open(Settings.SETTINGS_FILE, "r") as f:
                 data = json.loads(f.read())
