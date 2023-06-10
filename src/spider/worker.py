@@ -50,7 +50,7 @@ class Worker:
                     url_domain.http_status_code = req.status_code
                     url_domain.request_status = RequestStatus.OK
                     harvested_urls = processor.url.get_urls(url_domain.url, req.text)
-                    data = processor.data.get_visible_data(req.text)
+                    data = req.text
 
                     logging.debug(
                         f"[{self.id}] Added to Overseer.crawl_queue: {len(harvested_urls)} item(s)"

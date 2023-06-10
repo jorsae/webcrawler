@@ -2,6 +2,7 @@ import cmd
 import threading
 
 import constants
+import processor
 import utility.UrlStatus
 from models import *
 from settings import Settings
@@ -169,6 +170,17 @@ class Commander(cmd.Cmd):
         reloaded = Settings.parse_settings()
         if reloaded is False:
             print("Failed to reload settings")
+
+    def do_summary(self, arg):
+        args = self.parse_args(arg)
+        if len(args) != 1:
+            print("summary takes 1 argument: id")
+            return
+
+        with constants.CRAWL_DATA_LOCK:
+            data = CrawlDataModel.select().where(CrawlDataModel.crawl_history_id == args[0]).get()
+        summary = processor.data.get_summarization(data.data)
+        print(summary)
 
     def parse_args(self, args):
         args = args.split(" ")

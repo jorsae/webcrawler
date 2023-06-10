@@ -2,6 +2,14 @@ import logging
 
 from bs4 import BeautifulSoup
 from bs4.element import Comment
+from summarizer import Summarizer
+
+
+def get_summarization(content):
+    visible_data = get_visible_data(content)
+    model = Summarizer()
+    result = model(visible_data)
+    return result
 
 
 def get_visible_data(content):
