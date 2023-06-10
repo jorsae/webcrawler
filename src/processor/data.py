@@ -8,7 +8,7 @@ from summarizer import Summarizer
 def get_summarization(content):
     visible_data = get_visible_data(content)
     model = Summarizer()
-    result = model(visible_data)
+    result = model(visible_data, ratio=0.2)
     return result
 
 
