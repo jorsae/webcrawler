@@ -1,6 +1,6 @@
 import logging
 import re
-from urllib.parse import urljoin
+from urllib.parse import urldefrag, urljoin
 
 from bs4 import BeautifulSoup
 
@@ -15,6 +15,7 @@ def get_urls(url, content):
         urls = []
         for link in soup.findAll("a", href=True):
             link = urljoin(url, link["href"])
+            link = urldefrag(link).url
             if re.match(constants.REGEX_URL, link) is not None:
                 urls.append(UrlDomain(link))
 
