@@ -1,0 +1,5 @@
+peewee
+bert-extractive-summarizer
+torch
+torchvision
+torchaudio
