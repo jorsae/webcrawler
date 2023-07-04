@@ -1,4 +1,5 @@
 import cmd
+import logging
 import threading
 
 import constants
@@ -145,6 +146,9 @@ class Commander(cmd.Cmd):
     def do_deepsettings(self, arg):
         "Display internal runtime settings"
         print(f"{Settings.SETTINGS_FILE=}")
+        print(
+            f"{Settings.LOG_LEVEL=} / {Settings.translate_loglevel(logging.getLogger().getEffectiveLevel())}"
+        )
         print(f"{Settings.DATABASE_FILE=}")
         print(f"{Settings.OVERSEER_RUN_DELAY=}")
         print(f"{Settings.MAX_TIMEOUT=}")

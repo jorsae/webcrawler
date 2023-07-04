@@ -15,6 +15,7 @@ class Settings:
     MAX_URLS_IN_CRAWL_HISTORY = 30
     MAX_EMAILS_IN_EMAIL_QUEUE = 20
     MAX_EMAILS_INSERTED_AT_ONCE = 999
+    LOG_LEVEL = logging.DEBUG
 
     def parse_settings():
         if os.path.isfile(Settings.SETTINGS_FILE) is False:
@@ -31,6 +32,8 @@ class Settings:
             Settings.MAX_URLS_IN_CRAWL_HISTORY = data.get("max_urls_in_crawl_history")
             Settings.MAX_EMAILS_IN_EMAIL_QUEUE = data.get("max_emails_in_email_queue")
             Settings.MAX_EMAILS_INSERTED_AT_ONCE = data.get("max_emails_inserted_at_once")
+            Settings.LOG_LEVEL = data.get("log_level")
+            logging.getLogger().setLevel(Settings.LOG_LEVEL)
 
             logging.info("Loaded settings successfully")
             return True
@@ -49,6 +52,7 @@ class Settings:
             "max_urls_in_crawl_history": Settings.MAX_URLS_IN_CRAWL_HISTORY,
             "max_emails_in_email_queue": Settings.MAX_EMAILS_IN_EMAIL_QUEUE,
             "max_emails_inserted_at_once": Settings.MAX_EMAILS_INSERTED_AT_ONCE,
+            "log_level": Settings.LOG_LEVEL,
         }
         try:
             json_data = json.dumps(
@@ -83,6 +87,10 @@ class Settings:
                 Settings.MAX_EMAILS_IN_EMAIL_QUEUE = value
             case "MAX_EMAILS_INSERTED_AT_ONCE":
                 Settings.MAX_EMAILS_INSERTED_AT_ONCE = value
+            case "LOG_LEVEL":
+                loglevel = Settings.translate_loglevel(value)
+                Settings.LOG_LEVEL = loglevel
+                logging.getLogger().setLevel(loglevel)
             case _:
                 return_value = False
 
@@ -90,3 +98,34 @@ class Settings:
             Settings.save_settings()
 
         return return_value
+
+    def translate_loglevel(log_level):
+        if type(log_level) == int:
+            if log_level == 10:
+                return "DEBUG"
+            elif log_level == 20:
+                return "INFO"
+            elif log_level == 30:
+                return "WARNING"
+            elif log_level == 40:
+                return "ERROR"
+            elif log_level == 50:
+                return "CRITICAL"
+            else:
+                return "N/A"
+        elif type(log_level) == str:
+            log_level = log_level.upper()
+            if log_level == "DEBUG":
+                return logging.DEBUG
+            elif log_level == "INFO":
+                return logging.INFO
+            elif log_level == "WARNING":
+                return logging.WARNING
+            elif log_level == "ERROR":
+                return logging.ERROR
+            elif log_level == "CRITICAL":
+                return logging.CRITICAL
+            else:
+                return None
+        else:
+            return "type: N/A"
