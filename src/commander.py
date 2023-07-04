@@ -21,6 +21,7 @@ class Commander(cmd.Cmd):
         cmd.Cmd.__init__(self)
 
     def do_exit(self, arg):
+        "Gracefully exit webcrawler"
         print("Stopping Spiders...")
         self.overseer.stop_all_spiders()
 
@@ -37,14 +38,13 @@ class Commander(cmd.Cmd):
         return cmd.Cmd.postcmd(self, True, "")
 
     def do_spiders(self, arg):
+        "Overview of all Spiders. e.g.: spiders"
         print(f"\tOverseer - t:{self.overseer_thread.is_alive()} / r:{self.overseer.run_overseer}")
         for spider in self.overseer.spiders:
             print(f"{spider}")
 
-    def do_create_spider(self, arg):
-        self.overseer.create_spider()
-
     def do_set_spider_url(self, arg):
+        "Set url for a spider. e.g.: set_spider_url <id> <url>"
         args = self.parse_args(arg)
         if len(args) != 2:
             print("set_spider_url takes 2 arguments: id url")
@@ -56,6 +56,7 @@ class Commander(cmd.Cmd):
             print(e)
 
     def do_start_spider(self, arg):
+        "Start a spider. e.g.: start_spider (id)"
         args = self.parse_args(arg)
 
         if type(args[0]) == int:
@@ -64,12 +65,11 @@ class Commander(cmd.Cmd):
             spider = self.overseer.create_spider()
             started_spider = self.overseer.start_spider(spider.id)
 
-        if started_spider:
-            print("Spider started successfully")
-        else:
+        if started_spider is False:
             print("Unable to start spider")
 
     def do_stop_spider(self, arg):
+        "Stop a spider. e.g.: stop_spider <id>"
         args = self.parse_args(arg)
         if len(args) <= 0:
             print(f"stop_spider takes 1 arg: <id>")
@@ -77,16 +77,20 @@ class Commander(cmd.Cmd):
         self.overseer.stop_spider(args[0])
 
     def do_start_all(self, arg):
+        "Start all spiders. e.g.: start_all"
         self.overseer.start_all_spiders()
 
     def do_stop_all(self, arg):
+        "Stop all spiders. e.g.: stop_all"
         self.overseer.stop_all_spiders()
 
     def do_stats(self, arg):
+        "Display all stats"
         self.internal_stats(arg)
         self.database_stats(arg)
 
     def internal_stats(self, arg):
+        "Display internal runtime stats"
         print("===== INTERNAL STATS =====")
         print(f"Crawl Queue: {len(Overseer.crawl_queue)} / {Settings.MAX_URLS_IN_CRAWL_QUEUE}")
         print(
@@ -97,6 +101,7 @@ class Commander(cmd.Cmd):
         )
 
     def database_stats(self, arg):
+        "Display database stats"
         print("===== DATABASE STATS =====")
         # Can cause locked database.
         with constants.URL_STATUS_MODEL_LOCK:
@@ -123,6 +128,7 @@ class Commander(cmd.Cmd):
         print(f"{request_statuses} // {url_statuses}")
 
     def do_settings(self, arg):
+        "Display all settings"
         print("===== SETTINGS =====")
         print(f"Database: {Settings.DATABASE_FILE}")
         print(f"Overseer run: {Settings.OVERSEER_RUN_DELAY}ms")
@@ -137,6 +143,7 @@ class Commander(cmd.Cmd):
         )
 
     def do_deepsettings(self, arg):
+        "Display internal runtime settings"
         print(f"{Settings.SETTINGS_FILE=}")
         print(f"{Settings.DATABASE_FILE=}")
         print(f"{Settings.OVERSEER_RUN_DELAY=}")
@@ -149,6 +156,7 @@ class Commander(cmd.Cmd):
         print(f"{Settings.MAX_EMAILS_INSERTED_AT_ONCE=}")
 
     def do_change(self, arg):
+        "Change a setting. e.g.: change <setting_name> <value>"
         args = self.parse_args(arg)
         if len(args) != 2:
             print("csettings takes 2 arguments: setting_name value")
@@ -162,16 +170,19 @@ class Commander(cmd.Cmd):
             print(f"Failed to update setting: {setting_name} to {value}")
 
     def do_save(self, arg):
+        "Save settings to a file"
         saved = Settings.save_settings()
         if saved is False:
             print("Failed to save settings")
 
     def do_reload(self, arg):
+        "Reloads settings from a file"
         reloaded = Settings.parse_settings()
         if reloaded is False:
             print("Failed to reload settings")
 
     def do_summary(self, arg):
+        "Outputs a summary of crawl data. e.g.: summary <id>"
         args = self.parse_args(arg)
         if len(args) != 1:
             print("summary takes 1 argument: id")

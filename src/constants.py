@@ -10,6 +10,7 @@ CRAWL_EMAILS_LOCK = threading.Lock()
 URL_STATUS_MODEL_LOCK = threading.Lock()
 REQUEST_STATUS_MODEL_LOCK = threading.Lock()
 
+# Regex
 REGEX_URL = re.compile(
     r"^(?:http|ftp)s?://"  # http:// or https://
     r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|"  # domain...
@@ -19,5 +20,4 @@ REGEX_URL = re.compile(
     r"(?:/?|[/?]\S+)$",
     re.IGNORECASE,
 )
-
 REGEX_EMAIL_FETCH = re.compile(r"[a-z0-9\.\-+_]+@[a-z0-9\.\-+_]+\.[a-z]+", re.IGNORECASE)
